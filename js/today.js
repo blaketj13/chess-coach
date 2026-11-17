@@ -104,6 +104,49 @@
     run();
   }
 
+  /* Before an account is linked: a short welcome, what linking does, and three things to do right now. */
+  function renderWelcome(root, opts) {
+    const P = window.PROFILES || {};
+    const persona = P["gambiteer"] ? "gambiteer" : Object.keys(P)[0];
+    const pName = persona && P[persona] ? (P[persona].shortName || P[persona].name) : "a sparring bot";
+    const pRating = persona && P[persona] ? (P[persona].ratingLabel || "") : "";
+    const piece = (code) => "<img class=\"wl-piece\" src=\"vendor/pieces/cburnett/" + code + ".svg\" alt=\"\" aria-hidden=\"true\" onerror=\"this.remove()\">";
+    root.innerHTML =
+      "<div class=\"op-page today-page welcome-page\">" +
+      "<section class=\"wl-hero\">" +
+      "<div class=\"wl-board\" aria-hidden=\"true\"></div>" +
+      "<p class=\"wl-eyebrow\">Sparring Coach</p>" +
+      "<h2 class=\"wl-title\">Let’s train on your own mistakes.</h2>" +
+      "<ul class=\"wl-points\">" +
+      "<li><span class=\"wl-dot\" aria-hidden=\"true\">10</span>I build a daily 10 from your games</li>" +
+      "<li><span class=\"wl-dot\" aria-hidden=\"true\">⌂</span>Your games stay on this device</li>" +
+      "</ul>" +
+      "<button type=\"button\" class=\"btn primary wl-cta\" id=\"td-connect\">Connect your account</button>" +
+      "<p class=\"wl-fine\">Lichess, Chess.com, or a PGN file</p>" +
+      "</section>" +
+      "<h3 class=\"wl-section\">Start now</h3>" +
+      "<div class=\"wl-cards\">" +
+      "<button type=\"button\" class=\"wl-card\" id=\"td-think\">" +
+      "<span class=\"wl-icon\">" + piece("wN") + "</span>" +
+      "<span class=\"wl-copy\"><strong>Think With Me</strong><span>One position, step by step</span></span>" +
+      "<span class=\"wl-go\" aria-hidden=\"true\">›</span></button>" +
+      "<button type=\"button\" class=\"wl-card\" id=\"td-opening\">" +
+      "<span class=\"wl-icon\">" + piece("wP") + "</span>" +
+      "<span class=\"wl-copy\"><strong>Ponziani</strong><span>Your first White opening</span></span>" +
+      "<span class=\"wl-go\" aria-hidden=\"true\">›</span></button>" +
+      "<button type=\"button\" class=\"wl-card\" id=\"td-spar\">" +
+      "<span class=\"wl-icon\">" + piece("bQ") + "</span>" +
+      "<span class=\"wl-copy\"><strong>Spar the " + esc(pName) + "</strong><span>" + esc(pRating ? pRating + " · fast attacks" : "A bot with a style") + "</span></span>" +
+      "<span class=\"wl-go\" aria-hidden=\"true\">›</span></button>" +
+      "</div>" +
+      "</div>";
+    if (window.AppChrome) { window.AppChrome.setTitle("Today"); window.AppChrome.setBack(null); }
+    $("#td-connect", root).addEventListener("click", function () { showConnect(root, opts); });
+    $("#td-think", root).addEventListener("click", function () { if (opts.onThink) opts.onThink(); });
+    $("#td-opening", root).addEventListener("click", function () { if (opts.onOpening) opts.onOpening("ponziani"); });
+    $("#td-spar", root).addEventListener("click", function () { if (opts.onSpar && persona) opts.onSpar(persona); });
+  }
+
   async function renderToday(root, opts) {
     opts = opts || {};
     const acc = window.SCAccount ? await window.SCAccount.getAccount() : null;
@@ -118,15 +161,7 @@
       window.SCAccount.analyzeQueued(opts.engine);
     }
     if (!acc) {
-      root.innerHTML =
-        "<div class=\"op-page today-page\">" +
-        "<p class=\"cue-bar\">Train from your own games.</p>" +
-        "<button type=\"button\" class=\"btn primary\" id=\"td-connect\">Connect your account</button>" +
-        "<button type=\"button\" class=\"text-btn\" id=\"td-think\">Or start a Think With Me rep</button>" +
-        "</div>";
-      $("#td-connect", root).addEventListener("click", function () { showConnect(root, opts); });
-      if ($("#td-think", root)) $("#td-think", root).addEventListener("click", function () { if (opts.onThink) opts.onThink(); });
-      if (window.AppChrome) { window.AppChrome.setTitle("Today"); window.AppChrome.setBack(null); }
+      renderWelcome(root, opts);
       return;
     }
     const total = an.total || 0;

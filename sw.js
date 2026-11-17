@@ -1,6 +1,6 @@
 /* Cache runtime assets, including the unmodified Stockfish wasm, for offline and repeat loads.
    The engine files are stored as-is and never rewritten. */
-const CACHE = "sparring-coach-1.5.0";
+const CACHE = "sparring-coach-1.5.1";
 const PRECACHE = [
   "./",
   "./index.html",

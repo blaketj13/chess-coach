@@ -234,6 +234,12 @@
     return {
       engine: UI.hooks && UI.hooks.engine && UI.hooks.engine(),
       onThink: function (card) { showTab("think", card); },
+      onOpening: async function (id) {
+        showTab("openings");
+        if (!UI._dataLoaded) await loadData();
+        openOpening(id);
+        AppChrome.setBack(function () { showTab("today"); });
+      },
       onPlan: function () { showTab("clarity"); },
       onSpar: function (id) {
         if (UI.hooks && UI.hooks.startSparring) UI.hooks.startSparring({ opponentId: id });

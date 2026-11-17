@@ -1,5 +1,5 @@
 (function () {
-  const APP_VERSION = "1.5.0";
+  const APP_VERSION = "1.5.1";
   window.APP_VERSION = APP_VERSION;
 
   function notifyAndroidEngine(ok, why) {
