@@ -110,7 +110,7 @@
 
   function legalSan(chess, san) {
     try {
-      const mv = chess.move(san, { sloppy: true });
+      const mv = (window.SCSan && window.SCSan.move) ? window.SCSan.move(chess, san) : chess.move(san);
       if (!mv) return false;
       chess.undo();
       return true;

@@ -20,11 +20,18 @@
     if (cut.length <= (n || 90)) return cut;
     return s.slice(0, n || 90).replace(/\s+\S*$/, "") + "…";
   }
-  function words8(s) {
+  const HANG = /^(for|to|of|and|or|a|an|the|his|her|its|if|then|with|by|on|in|at|from|vs|vs\.)$/i;
+  function words8(s, maxChars) {
     const t = String(s || "").replace(/\s+/g, " ").trim();
     if (!t) return "";
-    const w = t.split(" ").filter(Boolean);
-    return w.length <= 8 ? t : w.slice(0, 8).join(" ");
+    const max = maxChars || 88;
+    const sent = t.match(/^.+?[.!](?:\s|$)/);
+    if (sent && sent[0].trim().length <= max) return sent[0].trim();
+    if (t.length <= max) return t;
+    let cut = t.slice(0, max).replace(/\s+\S*$/, "");
+    const w = cut.split(" ").filter(Boolean);
+    while (w.length > 3 && HANG.test(w[w.length - 1])) w.pop();
+    return w.join(" ") + "…";
   }
   function squaresIn(text) {
     const out = [];
@@ -189,6 +196,12 @@
         if (!cov.ok) issues.push({ opening: o.id, chapter: ch.id, issue: "coverage " + cov.covered + "/" + cov.total, missing: cov.missing.slice(0, 3) });
         if (!g.ok) issues.push({ opening: o.id, chapter: ch.id, issue: "guided: " + (g.issues[0] || "fail") });
         if (!s.ok) issues.push({ opening: o.id, chapter: ch.id, issue: "solo: " + (s.issues[0] || "fail") });
+        if (window.UI && window.UI.chapterEndHTML) {
+          const html = window.UI.chapterEndHTML(o, ch);
+          if (!/\bprimary\b|play-cta|data-primary|button\.rec/.test(html)) {
+            issues.push({ opening: o.id, chapter: ch.id, issue: "no primary on chapter end" });
+          }
+        }
         /* Continue exists whenever a later chunk remains. */
         const parts = chunks(o, ch);
         for (let i = 0; i < parts.length; i++) {
@@ -273,7 +286,7 @@
         "</div>";
       board = new window.BoardUI($("#pr-board", root), {
         flipped: opening.color === "black",
-        showMaterial: true,
+        showMaterial: false,
         canMove: function () { return !busy && !locked && chess.turn() === ourColor; },
         onMove: onUserMove
       });
@@ -313,7 +326,7 @@
     function showNav(buttons) {
       const nav = $("#pr-nav", root);
       nav.innerHTML = buttons.map(function (b) {
-        return "<button type=\"button\" class=\"" + (b.primary ? "primary" : "") + "\" data-act=\"" + b.act + "\">" + esc(b.label) + "</button>";
+        return "<button type=\"button\" class=\"btn" + (b.primary ? " primary" : "") + "\" data-act=\"" + b.act + "\">" + esc(b.label) + "</button>";
       }).join("");
       nav.querySelectorAll("[data-act]").forEach(function (el) {
         el.addEventListener("click", function () { handleAct(el.getAttribute("data-act")); });

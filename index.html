@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-board-theme="slate">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <title>Sparring Coach</title>
+  <title>Sparring Coach 1.5.0</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="preload" href="engine/stockfish/stockfish-19-lite-single.wasm" as="fetch" type="application/wasm" crossorigin />
 </head>
 <body>
   <div class="app">
     <header class="topbar">
       <button type="button" id="btn-back" class="icon-btn" hidden aria-label="Back">←</button>
-      <h1 id="app-title">Play</h1>
-      <span id="engine-state" class="engine-state" title="Engine starting…">Engine starting…</span>
+      <h1 id="app-title">Today</h1>
+      <span id="engine-state" class="engine-dot warming" title="Engine warming…" aria-label="Engine warming"></span>
       <button type="button" id="btn-settings" class="icon-btn" aria-label="Settings">⚙</button>
     </header>
 
     <main class="main">
-      <section id="play-view">
+      <section id="today-view"></section>
+      <section id="train-view" hidden></section>
+      <section id="think-view" hidden></section>
+      <section id="play-view" hidden>
         <div id="lobby" class="lobby">
           <div id="opp-cards" class="opp-cards"></div>
           <div id="weak-spots" class="weak-spots"></div>
@@ -46,9 +48,9 @@
                 <div id="takeback-nudge" class="tb-nudge"></div>
                 <div id="best-reveal" class="tb-best" hidden></div>
                 <div class="tb-actions">
-                  <button type="button" id="btn-show-best">Show best</button>
-                  <button type="button" id="btn-takeback">Take back</button>
-                  <button type="button" id="btn-keep">Keep</button>
+                  <button type="button" class="btn" id="btn-show-best">Show best</button>
+                  <button type="button" class="btn" id="btn-takeback">Take back</button>
+                  <button type="button" class="btn" id="btn-keep">Keep</button>
                 </div>
               </div>
             </div>
@@ -80,17 +82,17 @@
     </main>
 
     <nav class="tabbar" aria-label="Sections">
-      <button type="button" class="tab on" data-tab="play">
+      <button type="button" class="tab on" data-tab="today">
+        <span class="tab-icon" aria-hidden="true">☀</span>
+        <span>Today</span>
+      </button>
+      <button type="button" class="tab" data-tab="train">
+        <span class="tab-icon" aria-hidden="true">📖</span>
+        <span>Train</span>
+      </button>
+      <button type="button" class="tab" data-tab="play">
         <span class="tab-icon" aria-hidden="true">♟</span>
         <span>Play</span>
-      </button>
-      <button type="button" class="tab" data-tab="openings">
-        <span class="tab-icon" aria-hidden="true">📖</span>
-        <span>Learn</span>
-      </button>
-      <button type="button" class="tab" data-tab="clarity">
-        <span class="tab-icon" aria-hidden="true">◎</span>
-        <span>Drills</span>
       </button>
     </nav>
   </div>
@@ -126,20 +128,20 @@
         </label>
         <label>Board
           <select id="theme-select">
-            <option value="green">Green</option>
-            <option value="wood" selected>Wood</option>
-            <option value="blue">Blue</option>
-            <option value="dark">Dark</option>
+            <option value="slate" selected>Slate &amp; Sand</option>
+            <option value="dusk">Dusk</option>
+            <option value="ink">Ink</option>
+            <option value="walnut">Walnut</option>
           </select>
         </label>
         <div class="toolbar-actions">
-          <button type="button" id="new-game">New game</button>
+          <button type="button" class="btn primary" id="new-game">New game</button>
           <button type="button" id="btn-sound" class="ghost" title="Sound">Sound off</button>
         </div>
       </div>
       <details id="about-panel" class="about-panel">
         <summary>About</summary>
-        <p>Sparring Coach <span class="app-ver">1.4.0</span>. An offline opening and sparring coach.</p>
+        <p><span class="app-ver">Sparring Coach 1.5.0.</span> An offline opening and sparring coach.</p>
         <p class="credit">© 2026 SpotVibe LLC. All rights reserved. The app’s own code is proprietary to SpotVibe LLC and is not open source.</p>
         <p class="credit">Style-mimic bots play from books built from the public-domain Lichess openings dataset (CC0), then Stockfish at a similar strength. Eval numbers stay hidden during the game. No account needed.</p>
         <p class="credit">Attacking ideas and the thinking routine are inspired by GM Igor Smirnov’s public teaching (Remote Chess Academy). Not affiliated with or endorsed by him or RCA.</p>
@@ -156,6 +158,12 @@
   </div>
 
   <script src="vendor/chess.js"></script>
+  <script src="js/chess-san.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/fsrs.js"></script>
+  <script src="js/account.js"></script>
+  <script src="js/think.js"></script>
+  <script src="js/today.js"></script>
   <script src="js/profiles.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/coach.js"></script>
@@ -169,5 +177,15 @@
   <script src="js/ui.js"></script>
   <script src="js/drill-audit.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    // Assets inside the Android APK are already local. A service worker there
+    // can pin a stale cache, so only register it on the public website.
+    var isApk = location.hostname === "appassets.androidplatform.net" || location.protocol === "file:";
+    if ("serviceWorker" in navigator && !isApk && location.search.indexOf("test=1") === -1 && location.search.indexOf("nosw=1") === -1) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>

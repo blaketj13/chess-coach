@@ -1,4 +1,4 @@
-/* Scored Find-your-openings quiz: style answers plus Blake's Chess.com results. */
+/* Scored Find-your-openings quiz: style answers plus the linked user's own games, when connected. */
 (function () {
   const QUESTIONS = [
     {
@@ -51,7 +51,7 @@
   const CANDIDATES = [
     { id: "ponziani", name: "Ponziani", color: "white", family: "ponziani", vs: "1…e5",
       moves: "1.e4 e5 2.Nf3 Nc6 3.c3, aiming for d4",
-      pros: "Clear plan (c3 and d4), less theory than the Ruy or Italian, and you’ve already scored well with it.",
+      pros: "Clear plan (c3 and d4), less theory than the Ruy or Italian, and a plan you can repeat.",
       cons: "3.c3 takes the knight’s square; you have to know 3…d5 and 3…Nf6. Don’t mix it with an early f4." },
     { id: "vienna", name: "Vienna (with the Vienna Gambit)", color: "white", family: "vienna", vs: "1…e5",
       moves: "1.e4 e5 2.Nc3, then 3.f4 or 3.Bc4",
@@ -59,7 +59,7 @@
       cons: "You must know 3…d5 against the gambit, and the fork trick 3…Nxe4. Never combine this with c3 in the same game." },
     { id: "scotch", name: "Scotch", color: "white", family: "scotch", vs: "1…e5",
       moves: "1.e4 e5 2.Nf3 Nc6 3.d4",
-      pros: "Opens the center at once. You’ve scored well with it as White. The branches are named by what he does after 4.Nxd4.",
+      pros: "Opens the center at once. The branches are named by what he does after 4.Nxd4.",
       cons: "More ‘which line am I in?’ than the Ponziani. 2…Nf6 is a Petrov, not a Scotch." },
     { id: "alapin", name: "Alapin Sicilian", color: "white", family: "sicilian", vs: "1…c5",
       moves: "1.e4 c5 2.c3, aiming for d4",
@@ -75,7 +75,7 @@
       cons: "It’s a fight, not an engine-equal opening. It does not apply vs 3.d4, 3.c3, or vs 1.b4 / 1.g3." },
     { id: "caro", name: "Caro-Kann", color: "black", family: "caro-kann", vs: "1.e4 only",
       moves: "1.e4 c6 2.d4 d5",
-      pros: "Solid, one pawn break (…d5), and you’ve played a lot of it. Good when you want a quieter Black game.",
+      pros: "Solid, one pawn break (…d5), Good when you want a quieter Black game.",
       cons: "Only answers 1.e4. Against 1.b4 or 1.g3, use the Pirc/Modern setup instead." }
   ];
 
@@ -135,7 +135,7 @@
   }
 
   function formatStat(st) {
-    if (!st || !st.games) return "No games in this family in your Chess.com file.";
+    if (!st || !st.games) return "No games in this family in your linked games yet.";
     return st.wins + "–" + (st.draws || 0) + "–" + st.losses + " in " + st.games +
       " games (" + st.winRate + "%). Reached move 15 in " + (st.reachedMove15Pct || "—") + "%." +
       (st.accuracyGames ? " Accuracy (sample of " + st.accuracyGames + "): " + st.accuracyAvg + "." : "");

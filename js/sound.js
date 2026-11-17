@@ -44,6 +44,13 @@
       return this._ctx;
     },
 
+    _tap(ms) {
+      try {
+        if (!this.on || !navigator.vibrate) return;
+        navigator.vibrate(ms || 12);
+      } catch (e) {}
+    },
+
     _beep(freq, dur, type, gain) {
       if (!this.on) return;
       const ctx = this._audio();
@@ -60,10 +67,10 @@
       o.stop(ctx.currentTime + dur);
     },
 
-    move() { this._beep(520, 0.08, "triangle", 0.04); },
-    good() { this._beep(660, 0.1, "sine", 0.05); setTimeout(() => this._beep(880, 0.12, "sine", 0.04), 80); },
-    warn() { this._beep(240, 0.16, "square", 0.04); },
-    capture() { this._beep(200, 0.12, "sawtooth", 0.035); },
+    move() { this._beep(520, 0.08, "triangle", 0.04); this._tap(10); },
+    good() { this._beep(660, 0.1, "sine", 0.05); setTimeout(() => this._beep(880, 0.12, "sine", 0.04), 80); this._tap(16); },
+    warn() { this._beep(240, 0.16, "square", 0.04); this._tap([8, 30, 12]); },
+    capture() { this._beep(200, 0.12, "sawtooth", 0.035); this._tap(18); },
 
     speak(text) {
       if (!this.on || !this.voice || !text || !window.speechSynthesis) return;

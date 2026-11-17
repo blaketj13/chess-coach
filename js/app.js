@@ -1,5 +1,5 @@
 (function () {
-  const APP_VERSION = "1.4.0";
+  const APP_VERSION = "1.5.0";
   window.APP_VERSION = APP_VERSION;
 
   function notifyAndroidEngine(ok, why) {
@@ -21,6 +21,7 @@
     uciHistory: [],
     engine: null,
     engineReady: false,
+    playSearch: { movetime: 250, depth: 12 },
     thinking: false,
     pending: null,
     books: null,
@@ -50,8 +51,11 @@
   function setEngineLabel(text, ok) {
     const el = $("#engine-state");
     if (!el) return;
-    el.textContent = text;
-    el.className = "engine-state" + (ok ? " ready" : "");
+    const failed = /fail/i.test(text || "");
+    el.textContent = "";
+    el.className = "engine-dot" + (ok ? " ready" : failed ? " failed" : " warming");
+    el.title = text || "";
+    el.setAttribute("aria-label", text || "Engine");
   }
   function setPhase() {
     const el = $("#phase-badge");
@@ -137,7 +141,9 @@
     const fen = state.chess.fen();
     const p = profile();
     await state.engine.setStrength(p.elo, p.skill);
-    const result = await state.engine.analyze(fen, { movetime: 450, multipv: 3 });
+    if (window.SCAccount && window.SCAccount.pauseAnalysis) window.SCAccount.pauseAnalysis();
+    const result = await state.engine.analyze(fen, { movetime: (state.playSearch && state.playSearch.movetime) || 250, depth: (state.playSearch && state.playSearch.depth) || 12, multipv: 3 });
+    if (window.SCAccount && window.SCAccount.resumeAnalysis) window.SCAccount.resumeAnalysis(state.engine);
     const pvs = result.pvs || [];
     if (!pvs.length && result.bestmove) return result.bestmove;
     const best = pvs[0];
@@ -220,6 +226,7 @@
     return (sel && sel.value) || state.opponentId;
   }
   function showGameUI() {
+    if (window.UI && window.UI.showTab) window.UI.showTab("play");
     const lobby = $("#lobby");
     const game = $("#game-ui");
     if (lobby) lobby.hidden = true;
@@ -230,7 +237,11 @@
     const game = $("#game-ui");
     if (lobby) lobby.hidden = false;
     if (game) game.hidden = true;
-    if (window.AppChrome) { window.AppChrome.setTitle("Play"); window.AppChrome.setBack(null); }
+    const play = $("#play-view");
+    if (window.AppChrome && play && !play.hidden) {
+      window.AppChrome.setTitle("Play");
+      window.AppChrome.setBack(null);
+    }
   }
 
   function hideTakeback() {
@@ -314,7 +325,7 @@
       } else if (m.fen && m.bestSan && typeof Chess !== "undefined") {
         try {
           const c = new Chess(m.fen);
-          const mv = c.move(m.bestSan, { sloppy: true });
+          const mv = (window.SCSan && window.SCSan.move) ? window.SCSan.move(c, m.bestSan) : c.move(m.bestSan);
           if (mv && (mv.from !== m.playedFrom || mv.to !== m.playedTo)) arrows.push({ from: mv.from, to: mv.to, color: "#3d8b6e" });
         } catch (e) {}
       }
@@ -724,6 +735,7 @@
       notifyAndroidEngine(true);
       const p = profile();
       await state.engine.setStrength(p.elo, p.skill);
+      if (window.SCAccount && window.SCAccount.analyzeQueued) window.SCAccount.analyzeQueued(state.engine);
     } catch (e) {
       console.error(e);
       setEngineLabel("Engine failed — book moves only", false);
@@ -732,7 +744,7 @@
   }
 
   async function init() {
-    setEngineLabel("Loading engine…", false);
+    setEngineLabel("Engine warming…", false);
     if (window.Sound) {
       const btn = $("#btn-sound");
       if (btn) {
@@ -760,7 +772,7 @@
     }
     const boot = state._boot = bootEngineAndBooks();
     if (window.UI) {
-      try { await window.UI.init({ startSparring: startSparring, playFromFen: playFromFen, reviewMove: engineReview, currentOpponent: currentOpponent }); } catch (e) { console.error(e); }
+      try { await window.UI.init({ startSparring: startSparring, playFromFen: playFromFen, reviewMove: engineReview, currentOpponent: currentOpponent, engine: function () { return state.engine; } }); } catch (e) { console.error(e); }
     }
     if (location.search.indexOf("test=1") !== -1) {
       await boot;
@@ -807,16 +819,17 @@
     });
     renderWeakSpots();
   }
+  if (window.SCAccount && window.SCAccount.onChange && !renderLobby._bound) {
+    renderLobby._bound = true;
+    window.SCAccount.onChange(function () { renderLobby(); });
+  }
 
   async function renderWeakSpots() {
     const el = $("#weak-spots");
     if (!el) return;
     try {
-      if (!renderWeakSpots._data) {
-        const base = document.baseURI || location.href;
-        renderWeakSpots._data = await fetch(new URL("data/weak-spots.json", base)).then(function (r) { return r.json(); });
-      }
-      const data = renderWeakSpots._data;
+      const spots = (window.SCAccount && window.SCAccount.weakSpots) ? await window.SCAccount.weakSpots() : [];
+      const data = { title: "Know your weak spots", spots: spots };
       const cur = currentOpponent();
       const rows = (data.spots || []).map(function (s) {
         const p = window.PROFILES && window.PROFILES[s.persona];
@@ -824,11 +837,15 @@
         const on = s.persona === cur ? " on" : "";
         return "<button type=\"button\" class=\"weak-spot" + on + "\" data-id=\"" + s.persona + "\">" +
           "<span class=\"ws-when\">" + s.when + " · " + s.record + "</span>" +
-          "<span class=\"ws-go\">Try " + label + "</span></button>";
+          "<span class=\"ws-go\">Spar " + label + "</span></button>";
       }).join("");
+      if (!rows) {
+        el.innerHTML = "<p class=\"ws-title\">Know your weak spots</p><p class=\"ws-why\">Connect your account on Today to see where you score worst.</p>";
+        return;
+      }
       el.innerHTML = "<p class=\"ws-title\">" + (data.title || "Know your weak spots") +
         " <button type=\"button\" class=\"text-btn why-btn\" id=\"ws-why\">Why?</button></p>" +
-        "<p class=\"ws-why\" id=\"ws-why-text\" hidden>From your own games only. These are the opening families you score worst in.</p>" +
+        "<p class=\"ws-why\" id=\"ws-why-text\" hidden>From your own games only, kept on this device.</p>" +
         rows;
       const why = $("#ws-why", el) || el.querySelector("#ws-why");
       const whyText = el.querySelector("#ws-why-text");
@@ -871,7 +888,7 @@
   async function engineReview(fen, san) {
     const chessBefore = new Chess(fen);
     const chessAfter = new Chess(fen);
-    const move = chessAfter.move(san, { sloppy: true });
+    const move = (window.SCSan && window.SCSan.move) ? window.SCSan.move(chessAfter, san) : chessAfter.move(san);
     if (!move) throw new Error("illegal " + san + " in " + fen);
     return reviewBlakeMove(chessBefore, move, chessAfter);
   }
@@ -1009,13 +1026,15 @@
       const ch0 = pon && pon.chapters && pon.chapters[0];
       const parts = (window.Practice && ch0) ? window.Practice.chunks(pon, ch0) : [];
       log(parts.length >= 1 && parts[0].moves && parts[0].moves.length >= 2, "Practice chunks a Ponziani chapter (" + parts.length + " chunks)");
-      const endHtml = (window.UI && ch0) ? window.UI.chapterEndHTML(pon, ch0) : "";
-      log(/end-next/.test(endHtml) && /end-quiz/.test(endHtml) && /end-back/.test(endHtml) && /end-tree/.test(endHtml),
-        "Chapter end has Next chapter, Quiz, Back, and Tree map");
+      const endHtml = (window.UI && ch0) ? window.UI.chapterEndHTML(pon, ch0, { correct: 11, total: 11, complete: true }) : "";
+      log(/end-next/.test(endHtml) && /end-again/.test(endHtml) && /end-back/.test(endHtml) && !/end-tree/.test(endHtml) && !/id="end-quiz"/.test(endHtml),
+        "Chapter end has Next chapter, Again, and Back (no Tree map)");
+      log(/11 of 11 moves played/.test(endHtml) && /Ponziani · /.test(endHtml) && /chapters/.test(endHtml),
+        "Chapter end reports this run’s moves and chapters, not raw SRS counts");
 
       const rous = "r1bqkbnr/pppp2pp/2n5/4pp2/2BPP3/5N2/PPP2PPP/RNBQK2R b KQkq - 0 4";
       const rc = new Chess(rous);
-      const fxe4 = rc.move("fxe4", { sloppy: true });
+      const fxe4 = (window.SCSan && window.SCSan.move) ? window.SCSan.move(rc, "fxe4") : rc.move("fxe4");
       log(!!fxe4, "Rousseau 4...fxe4 is legal in the Clarity FEN");
 
       if (window.DrillAudit && window.DrillAudit.run) {
@@ -1036,6 +1055,90 @@
       } else {
         log(false, "Practice.auditAll missing");
       }
+
+      const lastCh = pon && pon.chapters && pon.chapters[pon.chapters.length - 1];
+      const lastHtml = (window.UI && lastCh) ? window.UI.chapterEndHTML(pon, lastCh, { correct: 11, total: 11, complete: true }) : "";
+      log(/end-quiz-opening/.test(lastHtml) && /primary/.test(lastHtml) && !/id="end-next"/.test(lastHtml) && /end-again/.test(lastHtml) && /end-back/.test(lastHtml),
+        "Last chapter end has Quiz this opening as the primary, plus Again and Back");
+      const endsOk = (window.Openings.openings() || []).every(function (o) {
+        const chs = o.chapters || [];
+        if (!chs.length) return true;
+        const html = window.UI.chapterEndHTML(o, chs[chs.length - 1]);
+        return /primary/.test(html);
+      });
+      log(endsOk, "Every last-chapter end screen has a primary button");
+
+      const vienna = window.Openings.opening("vienna");
+      const vCh = vienna && vienna.chapters && vienna.chapters[0];
+      let altOk = false;
+      if (vienna && window.Openings.repertoireMovesAt) {
+        const pos = window.Openings.learnOrder(vienna, vCh) || [];
+        for (let i = 0; i < pos.length; i++) {
+          const fen = window.Openings.fenAfter(pos[i].path.slice(0, -1));
+          const alts = window.Openings.repertoireMovesAt(vienna, fen);
+          if (alts.length > 1) { altOk = true; break; }
+        }
+      }
+      log(altOk, "Quiz can see more than one repertoire move at a Vienna position");
+      log(window.UI.shortOpeningName(vienna) === "Vienna" && window.UI.shortOpeningName(pon) === "Ponziani",
+        "Opening titles shorten to Vienna / Ponziani");
+
+      if (window.SCSan && window.SCSan.playLine) {
+        const games = (window.Fianchetto.data() && window.Fianchetto.data().modelGames) || [];
+        const bad = [];
+        games.forEach(function (g) {
+          const r = window.SCSan.playLine(g.sans || []);
+          if (!r.ok) bad.push((g.id || g.title || "?") + " ply " + r.at + " " + r.san);
+        });
+        function walkSan(node, chess, label, acc) {
+          ((node && node.replies) || []).forEach(function (r) {
+            const snap = chess.fen();
+            if (r.san) {
+              const c2 = new Chess(snap);
+              const ok = window.SCSan.move(c2, r.san);
+              if (!ok) acc.push(label + " " + r.san);
+            }
+            const u = r.uci;
+            const okU = u && chess.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] });
+            if (okU) {
+              walkSan(r, chess, label + "/" + (r.san || r.uci), acc);
+              chess.undo();
+            }
+          });
+        }
+        const treeBad = [];
+        (window.Openings.openings() || []).forEach(function (o) {
+          (o.chapters || []).forEach(function (ch) {
+            walkSan(ch.tree || { replies: ch.replies || [] }, new Chess(), o.id + "/" + ch.id, treeBad);
+          });
+        });
+        log(!bad.length && !treeBad.length, "Strict SAN audit of bundled games and lines" +
+          (bad[0] ? " (games: " + bad[0] + ")" : "") + (treeBad[0] ? " (tree: " + treeBad[0] + ")" : ""));
+      } else {
+        log(false, "SCSan missing");
+      }
+
+      if (window.SCAccount && window.SCAccount.spotLabel) {
+        const v = window.SCAccount.spotLabel({ id: "vienna", name: "the Vienna" }, "white", 2, 0, 4, 6);
+        const f = window.SCAccount.spotLabel({ id: "french", name: "the French" }, "white", 3, 1, 4, 8);
+        log(v.when === "Your Vienna as White" && v.record === "2 wins in 6",
+          "Weak-spot label for your own White opening: " + v.when + " · " + v.record);
+        log(f.when === "As White vs the French" && /3 wins, 1 draw in 8/.test(f.record),
+          "Weak-spot label for an opening you face: " + f.when + " · " + f.record);
+      } else {
+        log(false, "spotLabel missing");
+      }
+
+      log(!!(window.SCAccount && window.SCDB && window.SCFSRS && window.SCThink), "Connect, FSRS, and Think With Me modules loaded");
+      const sample = window.SCAccount.parsePgnGames('[Event "t"]\n[White "Me"]\n[Black "Opp"]\n[Result "0-1"]\n[Opening "London System"]\n\n1. d4 d5 2. Bf4 0-1\n');
+      log(sample.length === 1 && sample[0].opening.indexOf("London") !== -1, "PGN import parses a game without a network");
+      log(window.SCThink.steps.join(">") === "scan>threats>candidates>plan>check>move", "Think With Me follows scan, threats, candidates, plan, check, move");
+      const showBtns = Array.from(document.querySelectorAll("button")).filter(function (b) {
+        const cs = getComputedStyle(b);
+        if (cs.display === "none" || cs.visibility === "hidden") return false;
+        return false;
+      });
+      log(!!document.querySelector('img.cb-piece[src*="cburnett"]'), "Play board uses Cburnett SVG pieces");
     } catch (e) {
       log(false, "Exception: " + e.message);
       console.error(e);
@@ -1075,7 +1178,7 @@
     playFromFen: playFromFen,
     engineReview: engineReview,
     async playSan(san) {
-      const mv = (new Chess(state.chess.fen())).move(san, { sloppy: true });
+      const mv = (window.SCSan && window.SCSan.move) ? window.SCSan.move(new Chess(state.chess.fen()), san) : (new Chess(state.chess.fen())).move(san);
       if (!mv) return null;
       await handleBlakeMove({ from: mv.from, to: mv.to, promotion: mv.promotion });
       return mv.san;

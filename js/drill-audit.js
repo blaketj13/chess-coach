@@ -17,7 +17,8 @@
   function legalSan(chess, san) {
     if (!chess || !san) return false;
     const c = new Chess(chess.fen());
-    return !!c.move(san, { sloppy: true });
+    if (window.SCSan && window.SCSan.move) return !!window.SCSan.move(c, san);
+    return !!c.move(san);
   }
 
   function legalUci(chess, uci) {

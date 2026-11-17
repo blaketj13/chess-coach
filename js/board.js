@@ -1,17 +1,21 @@
 /* SVG piece set (Cburnett, CC BY-SA 3.0), themes, animation, material, in-square coords. */
 (function () {
   const THEMES = [
-    { id: "green", name: "Green" },
-    { id: "wood", name: "Wood" },
-    { id: "blue", name: "Blue" },
-    { id: "dark", name: "Dark" }
+    { id: "slate", name: "Slate & Sand" },
+    { id: "dusk", name: "Dusk" },
+    { id: "ink", name: "Ink" },
+    { id: "walnut", name: "Walnut" }
   ];
   const THEME_KEY = "sc.board.theme";
   const VALUES = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
   const START_COUNTS = { w: { p: 8, n: 2, b: 2, r: 2, q: 1, k: 1 }, b: { p: 8, n: 2, b: 2, r: 2, q: 1, k: 1 } };
 
   function loadTheme() {
-    try { return localStorage.getItem(THEME_KEY) || "wood"; } catch (e) { return "wood"; }
+    try {
+      const id = localStorage.getItem(THEME_KEY);
+      if (THEMES.some((t) => t.id === id)) return id;
+      return "slate";
+    } catch (e) { return "slate"; }
   }
   function saveTheme(id) {
     try { localStorage.setItem(THEME_KEY, id); } catch (e) {}
@@ -69,6 +73,8 @@
       this.root = root;
       this.flipped = !!(opts && opts.flipped);
       this.onMove = (opts && opts.onMove) || function () {};
+      this.onSquare = (opts && opts.onSquare) || null;
+      this.onArrow = (opts && opts.onArrow) || null;
       this.canMove = (opts && opts.canMove) || function () { return true; };
       this.showMaterial = opts && opts.showMaterial === false ? false : true;
       this.selected = null;
@@ -112,7 +118,7 @@
     clearSelection() { this.selected = null; this.legal = []; this.render(); }
     setArrows(list) { this.arrows = list || []; this._drawArrows(); }
     setTheme(id) {
-      const ok = THEMES.some((t) => t.id === id) ? id : "green";
+      const ok = THEMES.some((t) => t.id === id) ? id : "slate";
       saveTheme(ok);
       if (this.root) this.root.setAttribute("data-theme", ok);
     }
@@ -173,9 +179,23 @@
       mark.appendChild(tip);
       defs.appendChild(mark);
       svg.appendChild(defs);
-      const mid = mark.getAttribute("id");
-      for (const a of this.arrows || []) {
-        if (!a || !a.from || !a.to) continue;
+      (this.arrows || []).forEach((a, i) => {
+        if (!a || !a.from || !a.to) return;
+        const color = a.color || "#e8c84a";
+        const midI = "cb-ah-" + (this.root.id || "b") + "-" + i;
+        const markI = document.createElementNS(ns, "marker");
+        markI.setAttribute("id", midI);
+        markI.setAttribute("viewBox", "0 0 10 10");
+        markI.setAttribute("refX", "8");
+        markI.setAttribute("refY", "5");
+        markI.setAttribute("markerWidth", "4");
+        markI.setAttribute("markerHeight", "4");
+        markI.setAttribute("orient", "auto-start-reverse");
+        const tipI = document.createElementNS(ns, "path");
+        tipI.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+        tipI.setAttribute("fill", color);
+        markI.appendChild(tipI);
+        defs.appendChild(markI);
         const s = this._sqCenter(a.from);
         const e = this._sqCenter(a.to);
         const line = document.createElementNS(ns, "line");
@@ -183,13 +203,33 @@
         line.setAttribute("y1", s.y);
         line.setAttribute("x2", e.x);
         line.setAttribute("y2", e.y);
-        line.setAttribute("stroke", a.color || "#e8c84a");
+        line.setAttribute("stroke", color);
         line.setAttribute("stroke-width", a.width || 0.18);
         line.setAttribute("stroke-linecap", "round");
-        line.setAttribute("marker-end", "url(#" + mid + ")");
+        line.setAttribute("marker-end", "url(#" + midI + ")");
         line.setAttribute("opacity", a.opacity || 0.92);
+        line.setAttribute("class", "cb-arrow-line");
         svg.appendChild(line);
-      }
+        if (this.onArrow) {
+          const hit = document.createElementNS(ns, "line");
+          hit.setAttribute("x1", s.x);
+          hit.setAttribute("y1", s.y);
+          hit.setAttribute("x2", e.x);
+          hit.setAttribute("y2", e.y);
+          hit.setAttribute("stroke", "transparent");
+          hit.setAttribute("stroke-width", "0.7");
+          hit.setAttribute("stroke-linecap", "round");
+          hit.setAttribute("class", "cb-arrow-hit");
+          hit.style.pointerEvents = "stroke";
+          hit.style.cursor = "pointer";
+          hit.addEventListener("pointerdown", (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if (this.onArrow) this.onArrow(a);
+          });
+          svg.appendChild(hit);
+        }
+      });
     }
 
     _syncPieceSize() {
@@ -305,8 +345,14 @@
       if (e.target.closest && e.target.closest(".cb-promo")) return;
       const btn = e.target.closest("[data-sq]");
       if (!btn) return;
-      if (!this.canMove()) return;
       const sq = btn.getAttribute("data-sq");
+      if (!this.canMove()) {
+        if (this.onSquare) {
+          this._drag = { from: sq, startX: e.clientX, startY: e.clientY, dragging: false, tapOnly: true, pointerId: e.pointerId };
+          try { this.root.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        return;
+      }
       const chess = parseFenSafe(this.fen);
       const piece = chess.get(sq);
 
@@ -335,7 +381,7 @@
       const dx = e.clientX - this._drag.startX;
       const dy = e.clientY - this._drag.startY;
       if (!this._drag.dragging && dx * dx + dy * dy > 64) {
-        if (this._drag.deselect || this._drag.clickTo) return;
+        if (this._drag.deselect || this._drag.clickTo || this._drag.tapOnly) return;
         this._drag.dragging = true;
         const fromBtn = this.root.querySelector('[data-sq="' + this._drag.from + '"]');
         if (fromBtn) fromBtn.classList.add("dragging");
@@ -359,6 +405,11 @@
       try { this.root.releasePointerCapture(drag.pointerId); } catch (_) {}
       const to = this._squareAtPoint(e.clientX, e.clientY);
       this._clearGhost();
+      if (drag.tapOnly) {
+        const sq = to || drag.from;
+        if (sq && this.onSquare) this.onSquare(sq);
+        return;
+      }
       if (drag.dragging) {
         if (to) this._tryMove(drag.from, to);
         else this.render();
@@ -395,7 +446,7 @@
         const keys = ["q", "r", "b", "n"];
         overlay.innerHTML =
           '<div class="cb-promo-card" role="dialog" aria-label="Choose promotion piece">' +
-          keys.map((k) => '<button type="button" data-p="' + k + '" aria-label="Promote to ' + k + '"><img alt="' + k + '" src="' + pieceSrc(color, k) + '"></button>').join("") +
+          keys.map((k) => '<button type="button" class="promo-choice" data-p="' + k + '" aria-label="Promote to ' + k + '"><img alt="' + k + '" src="' + pieceSrc(color, k) + '"></button>').join("") +
           "</div>";
         host.appendChild(overlay);
         const finish = (val) => {

@@ -21,6 +21,44 @@
     return String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   }
 
+  const SHORT_OPENING = {
+    ponziani: "Ponziani", alapin: "Alapin", "white-c3d4": "c3 and d4", vienna: "Vienna",
+    scotch: "Scotch", "open-games": "Open games", london: "London", pirc: "Pirc",
+    rousseau: "Rousseau", caro: "Caro-Kann", qgd: "QGD", sokolsky: "vs 1.b4", g3: "vs 1.g3"
+  };
+  function shortOpeningName(opening) {
+    if (!opening) return "";
+    if (opening.id && SHORT_OPENING[opening.id]) return SHORT_OPENING[opening.id];
+    return String(opening.name || "").replace(/\s*\([^)]*\)\s*/g, "").replace(/\s+(Opening|Defence|Defense|Variation|System|Game)$/i, "").trim() || "Opening";
+  }
+
+  function scoreRing(got, total) {
+    const tot = Math.max(1, total || 0);
+    const pct = Math.max(0, Math.min(1, (got || 0) / tot));
+    const r = 15, circ = 2 * Math.PI * r;
+    const dash = (pct * circ).toFixed(1);
+    const label = String(got || 0) + "/" + String(total || 0);
+    return "<svg class=\"end-ring\" viewBox=\"0 0 36 36\" aria-hidden=\"true\">" +
+      "<circle class=\"end-ring-bg\" cx=\"18\" cy=\"18\" r=\"15\" fill=\"none\" stroke-width=\"3.2\"></circle>" +
+      "<circle class=\"end-ring-fg\" cx=\"18\" cy=\"18\" r=\"15\" fill=\"none\" stroke-width=\"3.2\" stroke-dasharray=\"" + dash + " " + circ.toFixed(1) + "\" stroke-linecap=\"round\" transform=\"rotate(-90 18 18)\"></circle>" +
+      "<text x=\"18\" y=\"21\" text-anchor=\"middle\">" + esc(label) + "</text></svg>";
+  }
+
+  function chaptersDone(opening, ch, session) {
+    const chs = (opening && opening.chapters) || [];
+    let done = 0;
+    let countedThis = false;
+    chs.forEach((c) => {
+      const p = window.Openings.chapterProgress(opening, c);
+      if (p.total && p.known >= p.total) {
+        done++;
+        if (ch && c.id === ch.id) countedThis = true;
+      }
+    });
+    if (session && session.complete && ch && !countedThis) done++;
+    return { done: done, total: chs.length };
+  }
+
 
   function ringSVG(known, total) {
     const tot = total || 1;
@@ -53,20 +91,35 @@
     }
   }
 
-  function chapterEndHTML(opening, ch) {
+  function chapterEndHTML(opening, ch, session) {
     const chs = (opening && opening.chapters) || [];
     const idx = chs.findIndex((c) => c.id === ch.id);
     const next = idx >= 0 && idx + 1 < chs.length ? chs[idx + 1] : null;
-    const p = window.Openings.chapterProgress(opening, ch);
-    const op = window.Openings.openingProgress(opening);
-    return "<p class=\"muted\">This chapter: " + p.known + " of " + p.total + " of your moves learned. Opening: " + op.known + " of " + op.total + ".</p>" +
+    const prog = window.Openings.chapterProgress(opening, ch);
+    const total = session && session.total != null ? session.total : (prog.total || 0);
+    const correct = session && session.correct != null ? session.correct : (prog.known || 0);
+    const chsDone = chaptersDone(opening, ch, session);
+    const primary = next
+      ? "<button type=\"button\" class=\"primary\" id=\"end-next\">Next chapter</button>"
+      : "<button type=\"button\" class=\"primary\" id=\"end-quiz-opening\">Quiz this opening</button>";
+    return "<div class=\"end-result\">" +
+      scoreRing(correct, total) +
+      "<p class=\"end-stat\">" + correct + " of " + total + " moves played</p>" +
+      "<p class=\"muted end-opening\">" + esc(shortOpeningName(opening)) + " · " + chsDone.done + " of " + chsDone.total + " chapters</p>" +
+      "</div>" +
       "<div class=\"nav-row\" id=\"ch-end-nav\">" +
-      (next ? "<button type=\"button\" class=\"primary\" id=\"end-next\">Next chapter: " + esc(next.name) + "</button>" : "") +
-      "<button type=\"button\" id=\"end-quiz\">Quiz this chapter</button>" +
-      "<button type=\"button\" id=\"end-back\">Back to opening</button>" +
-      "<button type=\"button\" id=\"end-tree\">Tree map</button>" +
-      "<button type=\"button\" id=\"end-again\">Again</button>" +
+      primary +
+      "<button type=\"button\" class=\"btn\" id=\"end-again\">Again</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"end-back\">Back</button>" +
       "</div>";
+  }
+
+  function ensurePrimaryAction(root) {
+    const nav = (root && root.querySelector) ? (root.querySelector("#ch-end-nav") || root) : document.getElementById("ch-end-nav");
+    if (!nav) return;
+    if (nav.querySelector(".primary, .play-cta, [data-primary], button.rec")) return;
+    const fallback = nav.querySelector("#end-back") || nav.querySelector("button.btn") || nav.querySelector("button");
+    if (fallback) fallback.classList.add("primary");
   }
 
   function bindChapterEnd(root, opening, ch, kind) {
@@ -83,6 +136,9 @@
     if (t) t.addEventListener("click", () => showTreeMap(opening, ch));
     const a = $("#end-again", root);
     if (a) a.addEventListener("click", () => (kind === "quiz" ? startQuiz(opening, ch) : startLearn(opening, ch)));
+    const qo = $("#end-quiz-opening", root);
+    if (qo) qo.addEventListener("click", () => startOpeningQuiz(opening));
+    ensurePrimaryAction(root);
   }
 
   function showTreeMap(opening, ch) {
@@ -102,20 +158,18 @@
     root.innerHTML =
       "<div class=\"op-page\"><button type=\"button\" class=\"text-btn\" id=\"back-op\">← " + esc(opening.name) + "</button>" +
       "<h2>" + esc(ch.name) + " — tree map</h2>" +
-      "<p class=\"muted\">" + p.known + " of " + p.total + " of your moves learned. Your moves are marked ✓ when they stick.</p>" +
-      "<div class=\"tree-map\">" + walk(ch.tree || { replies: [] }, [], 0) + "</div>" +
-      chapterEndHTML(opening, ch) + "</div>";
+      "<p class=\"muted\">Your moves are marked ✓ when they stick.</p>" +
+      "<div class=\"tree-map\">" + walk(ch.tree || { replies: [] }, [], 0) + "</div></div>";
     $("#back-op", root).addEventListener("click", () => openOpening(opening.id));
-    bindChapterEnd(root, opening, ch, "learn");
   }
 
   function showAnswerOn(chess, board, sans) {
     const want = (sans || [])[0];
     if (!want) return null;
-    const mv = chess.move(want, { sloppy: true });
+    const mv = (window.SCSan && window.SCSan.move) ? window.SCSan.move(chess, want) : chess.move(want);
     if (!mv) return null;
     board.setPosition(chess.fen(), { from: mv.from, to: mv.to, promotion: mv.promotion, san: mv.san });
-    if (board.setArrows) board.setArrows([{ from: mv.from, to: mv.to, color: "#3d8b6e" }]);
+    if (board.setArrows) board.setArrows([{ from: mv.from, to: mv.to, color: "#0072b2" }]);
     return mv;
   }
 
@@ -137,16 +191,19 @@
     UI._dataLoaded = true;
   }
   async function loadDataNow(base) {
-    const [rec, blake, lib, def, pircPlans, clarity] = await Promise.all([
+    const [rec, lib, def, pircPlans, clarity] = await Promise.all([
       window.Openings.load().catch(() => ({ openings: [] })),
-      fetch(new URL("data/blake-openings.json", base)).then((r) => r.json()).catch(() => null),
       fetch(new URL("data/openings/index.json", base)).then((r) => r.json()).catch(() => null),
       fetch(new URL("data/default-repertoire.json", base)).then((r) => r.json()).catch(() => null),
       fetch(new URL("data/plans/pirc-modern.json", base)).then((r) => r.json()).catch(() => null),
       fetch(new URL("data/clarity.json", base)).then((r) => r.json()).catch(() => null),
     ]);
     UI.rec = rec;
-    UI.blake = blake;
+    UI.blake = null;
+    UI.quizStats = null;
+    if (window.SCAccount && window.SCAccount.openingStats) {
+      window.SCAccount.openingStats().then(function (s) { UI.quizStats = s; }).catch(function () {});
+    }
     UI.library = lib;
     UI.pircPlans = pircPlans;
     UI.clarity = clarity;
@@ -156,26 +213,89 @@
     else UI.locked = loadLocked() || preset;
   }
 
-  function showTab(name) {
+  function hideViews() {
+    ["today", "play", "train", "openings", "clarity", "think"].forEach((id) => {
+      const el = document.getElementById(id + "-view");
+      if (el) el.hidden = true;
+    });
+  }
+  function markTab(name) {
+    const tab = (name === "openings" || name === "clarity" || name === "think") ? "train" : name;
+    $$(".tab").forEach((t) => t.classList.toggle("on", t.getAttribute("data-tab") === tab));
+  }
+  function thinkOpts() {
+    return {
+      engine: UI.hooks && UI.hooks.engine && UI.hooks.engine(),
+      playFromFen: UI.hooks && UI.hooks.playFromFen,
+      onBack: function () { showTab("train"); }
+    };
+  }
+  function todayOpts() {
+    return {
+      engine: UI.hooks && UI.hooks.engine && UI.hooks.engine(),
+      onThink: function (card) { showTab("think", card); },
+      onPlan: function () { showTab("clarity"); },
+      onSpar: function (id) {
+        if (UI.hooks && UI.hooks.startSparring) UI.hooks.startSparring({ opponentId: id });
+        else showTab("play");
+      },
+      onDone: function () { showTab("today"); },
+      onBack: function () { showTab("today"); }
+    };
+  }
+  function showTab(name, extra) {
     if (name === "learn") name = "openings";
     if (name === "drills") name = "clarity";
-    $$(".tab").forEach((t) => t.classList.toggle("on", t.getAttribute("data-tab") === name));
-    ["play", "openings", "clarity"].forEach((id) => {
-      const el = document.getElementById(id + "-view");
-      if (el) el.hidden = id !== name;
-    });
+    markTab(name);
+    hideViews();
+    if (name === "today") {
+      const el = document.getElementById("today-view");
+      if (el) { el.hidden = false; if (window.SCToday) window.SCToday.renderToday(el, todayOpts()); }
+      return;
+    }
     if (name === "play") {
+      const el = document.getElementById("play-view");
+      if (el) el.hidden = false;
       AppChrome.setTitle("Play");
       AppChrome.setBack(null);
+      return;
+    }
+    if (name === "train") {
+      const el = document.getElementById("train-view");
+      if (el) {
+        el.hidden = false;
+        if (window.SCToday) window.SCToday.renderTrain(el, {
+          onThink: function () { showTab("think"); },
+          onLessons: function () { showTab("openings"); },
+          onDrills: function () { showTab("clarity"); }
+        });
+      }
+      return;
+    }
+    if (name === "think") {
+      const el = document.getElementById("think-view");
+      if (el) {
+        el.hidden = false;
+        const pos = extra && extra.fen ? extra : (window.SCThink && window.SCThink.starters[0]);
+        const mode = extra && extra.mode ? extra.mode : "help";
+        if (window.SCThink) window.SCThink.start(el, Object.assign(thinkOpts(), { pos: pos, mode: mode, onFinished: extra && extra.onFinished }));
+      }
+      return;
     }
     if (name === "openings") {
-      AppChrome.setTitle("Learn");
+      const el = document.getElementById("openings-view");
+      if (el) el.hidden = false;
+      AppChrome.setTitle("Lessons");
+      AppChrome.setBack(function () { showTab("train"); });
       if (!UI._dataLoaded && UI.loadData) UI.loadData().then(() => renderOpenings());
       else renderOpenings();
+      return;
     }
     if (name === "clarity") {
+      const el = document.getElementById("clarity-view");
+      if (el) el.hidden = false;
       AppChrome.setTitle("Drills");
-      AppChrome.setBack(null);
+      AppChrome.setBack(function () { showTab("train"); });
       if (!UI._dataLoaded && UI.loadData) UI.loadData().then(() => renderClarity());
       else renderClarity();
     }
@@ -253,6 +373,10 @@
       "<div class=\"op-page\">" +
       "<p class=\"cue-bar\">Trade the bishop, then open a file. <button type=\"button\" class=\"text-btn why-btn\" id=\"f-why-btn\">Why?</button></p>" +
       "<div id=\"f-why-panel\" class=\"why-panel\" hidden>" + whyHtml + "</div>" +
+      "<div class=\"nav-row\" id=\"f-home-nav\">" +
+      "<button type=\"button\" class=\"primary\" id=\"f-start-drill\">Start a drill</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"f-back-ops\">Back to openings</button>" +
+      "</div>" +
       "<div class=\"opening-list\" id=\"model-list\"></div>" +
       "<div class=\"opening-list\" id=\"drill-list\"></div>" +
       "</div>";
@@ -261,6 +385,13 @@
       const box = $("#f-why-panel", root);
       if (box) box.hidden = !box.hidden;
     });
+    const startD = $("#f-start-drill", root);
+    if (startD) startD.addEventListener("click", () => {
+      const first = (F.drills || [])[0];
+      if (first) openDrill(first);
+    });
+    const backOps = $("#f-back-ops", root);
+    if (backOps) backOps.addEventListener("click", () => backHome());
     const ml = $("#model-list", root);
     (F.modelGames || []).forEach((g, i) => {
       const b = document.createElement("button");
@@ -287,7 +418,10 @@
     const chess = new Chess();
     function fenAt(n) {
       const c = new Chess();
-      for (let i = 0; i < n && i < (g.sans || []).length; i++) c.move(g.sans[i], { sloppy: true });
+      for (let i = 0; i < n && i < (g.sans || []).length; i++) {
+        if (window.SCSan && window.SCSan.move) window.SCSan.move(c, g.sans[i]);
+        else c.move(g.sans[i]);
+      }
       return c.fen();
     }
     function noteAt(n) {
@@ -304,9 +438,9 @@
       "<p>" + esc(g.summary) + "</p>" +
       "<div id=\"review-board\" class=\"mini-board\"></div>" +
       "<div class=\"play-bar nav-row\">" +
-      "<button type=\"button\" id=\"gm-prev\">Prev</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"gm-prev\">Prev</button>" +
       "<span id=\"gm-ply\"></span>" +
-      "<button type=\"button\" id=\"gm-next\">Next</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"gm-next\">Next</button>" +
       "</div>" +
       "<p id=\"gm-san\" class=\"muted\"></p>" +
       "<p id=\"gm-note\"></p>" +
@@ -343,10 +477,10 @@
       "<div id=\"drill-board\" class=\"mini-board\"></div>" +
       "<div id=\"plan-choices\" class=\"idea-choices\" hidden></div>" +
       "<div id=\"drill-fb\" class=\"drill-fb\" hidden></div>" +
-      "<div class=\"nav-row\"><button type=\"button\" id=\"drill-show\">Show answer</button>" +
-      "<button type=\"button\" id=\"drill-again\" hidden>Again</button>" +
-      "<button type=\"button\" id=\"drill-play\" hidden>Play it out</button>" +
-      "<button type=\"button\" id=\"drill-back\" hidden>Back to list</button></div>" +
+      "<div class=\"nav-row\"><button type=\"button\" class=\"btn\" id=\"drill-show\">Show answer</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"drill-again\" hidden>Again</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"drill-play\" hidden>Play it out</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"drill-back\" hidden>Back to list</button></div>" +
       "</div>";
     $("#back-f", root).addEventListener("click", () => { UI.sub = "fianchetto"; renderOpenings(); });
     const whyBox = $("#d-why-panel", root);
@@ -428,9 +562,15 @@
       "<div class=\"op-page\">" +
       "<button type=\"button\" class=\"text-btn\" id=\"back-home\">← Openings</button>" +
       "<h2>Find your openings</h2>" +
-      "<p>Five questions about how you like to play, then a score that also uses your Chess.com results (4,093 games). Your current repertoire is the starting point; you can lock a different mix if the scores say so.</p>" +
+      "<p class=\"cue-bar\">Five questions about how you like to play. <button type=\"button\" class=\"text-btn why-btn\" id=\"find-why-btn\">Why?</button></p>" +
+      "<div id=\"find-why\" class=\"why-panel\" hidden>If you’ve connected your account, the score also uses your own games. Your current repertoire is the starting point.</div>" +
       "<div id=\"find-body\"></div></div>";
     $("#back-home", root).addEventListener("click", backHome);
+    const findWhy = $("#find-why-btn", root);
+    if (findWhy) findWhy.addEventListener("click", () => {
+      const box = $("#find-why", root);
+      if (box) box.hidden = !box.hidden;
+    });
     const body = $("#find-body", root);
 
     function showQuestion(i) {
@@ -460,26 +600,26 @@
         "<p><strong>The catch:</strong> " + esc(r.cons) + "</p>" +
         "<div class=\"nav-row\">" +
         "<button type=\"button\" class=\"try-btn\" data-open=\"" + esc(r.id) + "\">Study the line</button>" +
-        (UI.hooks && UI.hooks.startSparring ? "<button type=\"button\" data-drive=\"" + esc(r.id) + "\">Test-drive vs a bot</button>" : "") +
+        (UI.hooks && UI.hooks.startSparring ? "<button type=\"button\" class=\"btn\" data-drive=\"" + esc(r.id) + "\">Test-drive vs a bot</button>" : "") +
         "</div></article>";
     }
 
     function showResults() {
-      const result = F.score(answers, UI.blake);
+      const result = F.score(answers, UI.quizStats);
       UI.findResult = result;
       const note = F.unusualNote(answers);
       const w = result.white.slice(0, 3);
       const b = result.black.slice(0, 3);
       body.innerHTML =
         "<h3>Your top fits</h3>" +
-        "<p>The number is a 0–100 fit score: the quiz, plus how you’ve actually scored in that family on Chess.com.</p>" +
+        "<p>The number is a 0–100 fit score: the quiz, plus how you’ve scored in that family in your own games, when connected.</p>" +
         (note ? "<p class=\"why-not-mix\">" + esc(note) + "</p>" : "") +
         "<h4>White</h4>" + w.map(card).join("") +
         "<h4>Black</h4>" + b.map(card).join("") +
         "<section class=\"panel\"><h3>Lock a repertoire</h3>" +
         "<p class=\"muted\">This becomes the starting point in the library. You can change it later. Ponziani first, Vienna second, Scotch third is what you already picked; the quiz is here if you want to confirm or swap.</p>" +
         "<button type=\"button\" class=\"primary\" id=\"lock-current\">Keep my current repertoire</button> " +
-        "<button type=\"button\" id=\"lock-top\">Lock the quiz’s top mix</button> " +
+        "<button type=\"button\" class=\"btn\" id=\"lock-top\">Lock the quiz’s top mix</button> " +
         "<button type=\"button\" class=\"text-btn\" id=\"retake\">Retake the quiz</button>" +
         "<p id=\"lock-msg\" class=\"muted\"></p></section>";
       $$("[data-open]", body).forEach((btn) => btn.addEventListener("click", () => openOpening(btn.getAttribute("data-open"))));
@@ -516,12 +656,10 @@
   function renderPircPlans(root) {
     const P = UI.pircPlans;
     if (!P) { root.innerHTML = "<p>Couldn't load the Pirc and Modern plans.</p>"; return; }
-    root.innerHTML =
-      "<div class=\"op-page\">" +
-      "<button type=\"button\" class=\"text-btn\" id=\"back-home\">← Openings</button>" +
-      "<h2>" + esc(P.title) + "</h2><p>" + esc(P.intro) + "</p>" +
+    const whyHtml =
+      (P.intro ? "<p>" + esc(P.intro) + "</p>" : "") +
       (P.systems || []).map((s) =>
-        "<section class=\"panel principle\"><h3>" + esc(s.name) + "</h3>" +
+        "<section class=\"principle\"><h3>" + esc(s.name) + "</h3>" +
         "<p><strong>What he does:</strong> " + esc(s.whiteDoes) + "</p>" +
         "<p><strong>Your plan:</strong> " + esc(s.plan) + "</p>" +
         "<p class=\"rule\">" + esc(s.rule) + "</p>" +
@@ -529,10 +667,21 @@
         (s.note ? "<p class=\"muted\">" + esc(s.note) + "</p>" : "") +
         "</section>"
       ).join("") +
-      "<section class=\"panel\"><h3>Find the break</h3><p class=\"muted\">Each drill asks for the plan, then the first move, on a real Pirc setup.</p>" +
-      "<div class=\"card-grid\" id=\"pirc-drills\"></div></section>" +
-      "<p class=\"credit muted\">" + esc(P.credit) + "</p></div>";
+      (P.credit ? "<p class=\"credit muted\">" + esc(P.credit) + "</p>" : "");
+    root.innerHTML =
+      "<div class=\"op-page\">" +
+      "<button type=\"button\" class=\"text-btn\" id=\"back-home\">← Openings</button>" +
+      "<h2>" + esc(P.title) + "</h2>" +
+      "<p class=\"cue-bar\">Your plan depends on White’s setup. <button type=\"button\" class=\"text-btn why-btn\" id=\"pirc-why-btn\">Why?</button></p>" +
+      "<div id=\"pirc-why\" class=\"why-panel\" hidden>" + whyHtml + "</div>" +
+      "<section class=\"panel\"><h3>Find the break</h3><p class=\"muted\">Each drill asks for the plan, then the first move.</p>" +
+      "<div class=\"card-grid\" id=\"pirc-drills\"></div></section></div>";
     $("#back-home", root).addEventListener("click", backHome);
+    const pircWhy = $("#pirc-why-btn", root);
+    if (pircWhy) pircWhy.addEventListener("click", () => {
+      const box = $("#pirc-why", root);
+      if (box) box.hidden = !box.hidden;
+    });
     const box = $("#pirc-drills", root);
     (P.drills || []).forEach((d, i) => {
       const b = document.createElement("button");
@@ -560,10 +709,10 @@
       "<div id=\"drill-board\" class=\"mini-board\"></div>" +
       "<div id=\"plan-choices\" class=\"idea-choices\" hidden></div>" +
       "<div id=\"drill-fb\" class=\"drill-fb\" hidden></div>" +
-      "<div class=\"nav-row\"><button type=\"button\" id=\"drill-show\">Show answer</button>" +
-      "<button type=\"button\" id=\"drill-again\" hidden>Again</button>" +
-      "<button type=\"button\" id=\"drill-play\" hidden>Play it out</button>" +
-      "<button type=\"button\" id=\"drill-back\" hidden>Back to list</button></div>" +
+      "<div class=\"nav-row\"><button type=\"button\" class=\"btn\" id=\"drill-show\">Show answer</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"drill-again\" hidden>Again</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"drill-play\" hidden>Play it out</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"drill-back\" hidden>Back to list</button></div>" +
       "</div>";
     $("#back-p", root).addEventListener("click", () => { UI.sub = "pirc-plans"; renderOpenings(); });
     const whyBox = $("#d-why-panel", root);
@@ -648,12 +797,13 @@
         "</div>" +
         "<p class=\"rec-hint\">" + (learned ? "Ready for Solo" : "Start with Guided") + "</p>" +
         "<button type=\"button\" class=\"sub-link\" data-ch=\"" + esc(ch.id) + "\" data-mode=\"study\">Map</button> " +
+        "<button type=\"button\" class=\"sub-link\" data-ch=\"" + esc(ch.id) + "\" data-mode=\"tree\">Tree map</button> " +
         "<button type=\"button\" class=\"sub-link\" data-ch=\"" + esc(ch.id) + "\" data-mode=\"quiz\">Quiz</button>" +
         "</div>";
     }).join("");
     root.innerHTML =
       "<div class=\"op-page\">" +
-      "<p class=\"muted\">" + prog.known + "/" + prog.total + "</p>" +
+      "<p class=\"muted\">" + esc(shortOpeningName(o)) + " · " + chaptersDone(o).done + " of " + chaptersDone(o).total + " chapters</p>" +
       "<div class=\"nav-row\">" +
       "<button type=\"button\" class=\"sub-link\" id=\"btn-which\">Which line?</button>" +
       "<button type=\"button\" class=\"sub-link\" id=\"btn-compare\">Compare</button>" +
@@ -671,6 +821,7 @@
       btn.addEventListener("click", () => {
         if (mode === "guided" || mode === "solo") startLearn(o, ch, mode);
         else if (mode === "quiz") startQuiz(o, ch);
+        else if (mode === "tree") showTreeMap(o, ch);
         else studyChapter(o, ch);
       });
     });
@@ -685,11 +836,11 @@
       "<h2>" + esc(ch.name) + "</h2><p class=\"rule\">" + esc(ch.mnemonic) + "</p>" +
       "<div class=\"nav-row\">" +
       "<button type=\"button\" class=\"primary\" id=\"st-learn\">Learn this chapter</button>" +
-      "<button type=\"button\" id=\"st-quiz\">Quiz</button>" +
-      "<button type=\"button\" id=\"st-which\">Which line am I in?</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"st-quiz\">Quiz</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"st-which\">Which line am I in?</button>" +
       "</div>" +
       "<div id=\"study-board\" class=\"mini-board\"></div>" +
-      "<div class=\"play-bar nav-row\"><button type=\"button\" id=\"st-prev\">Prev</button><span id=\"st-san\"></span><button type=\"button\" id=\"st-next\">Next</button></div>" +
+      "<div class=\"play-bar nav-row\"><button type=\"button\" class=\"btn\" id=\"st-prev\">Prev</button><span id=\"st-san\"></span><button type=\"button\" class=\"btn\" id=\"st-next\">Next</button></div>" +
       "<div id=\"sit-map\"></div></div>";
     $("#back-op").addEventListener("click", () => openOpening(opening.id));
     $("#st-learn").addEventListener("click", () => startLearn(opening, ch));
@@ -746,13 +897,18 @@
         onBack: () => openOpening(opening.id),
         onPlayOut: (fen, color, note) => playOutFrom(fen, color, note),
         reviewMove: UI.hooks && UI.hooks.reviewMove,
-        onComplete: () => {
-          AppChrome.setTitle(ch.name);
+        onComplete: (result) => {
+          const session = {
+            correct: (result && result.hits) || 0,
+            total: ((result && result.hits) || 0) + ((result && result.misses && result.misses.length) || 0),
+            complete: true
+          };
+          AppChrome.setTitle(shortOpeningName(opening));
           AppChrome.setBack(() => openOpening(opening.id));
           root.innerHTML =
             "<div class=\"op-page\">" +
             "<h2>" + (mode === "solo" ? "Solo complete" : "Chapter complete") + "</h2>" +
-            chapterEndHTML(opening, ch) + "</div>";
+            chapterEndHTML(opening, ch, session) + "</div>";
           bindChapterEnd(root, opening, ch, "learn");
         }
       });
@@ -760,7 +916,7 @@
     }
     const due = window.Openings.dueForChapter(opening, ch);
     if (!due.length) {
-      root.innerHTML = "<div class=\"op-page\"><h2>Chapter complete</h2>" + chapterEndHTML(opening, ch) + "</div>";
+      root.innerHTML = "<div class=\"op-page\"><h2>Chapter complete</h2>" + chapterEndHTML(opening, ch, { correct: 0, total: 0, complete: true }) + "</div>";
       AppChrome.setBack(() => openOpening(opening.id));
       bindChapterEnd(root, opening, ch, "learn");
       return;
@@ -782,19 +938,69 @@
       $("#back-ch").addEventListener("click", () => studyChapter(opening, ch));
       return;
     }
-    runMoveQuiz(root, opening, ch, queue, "quiz", "← " + ch.name, () => studyChapter(opening, ch));
+    runMoveQuiz(root, opening, ch, queue, "quiz", shortOpeningName(opening), () => studyChapter(opening, ch));
+  }
+
+  function startOpeningQuiz(opening) {
+    UI.sub = "quiz";
+    const root = $("#openings-root");
+    const queue = [];
+    (opening.chapters || []).forEach((ch) => {
+      (window.Openings.learnOrder(opening, ch) || []).forEach((p) => {
+        queue.push(Object.assign({}, p, { chapter: ch, chapterId: ch.id }));
+      });
+    });
+    for (let i = queue.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tq = queue[i]; queue[i] = queue[j]; queue[j] = tq;
+    }
+    const cap = queue.slice(0, Math.min(12, queue.length));
+    const chs = opening.chapters || [];
+    const last = chs[chs.length - 1] || chs[0];
+    if (!cap.length || !last) {
+      root.innerHTML = "<div class=\"op-page\"><p>No quiz positions in this opening yet.</p><button type=\"button\" class=\"text-btn\" id=\"back-ch\">Back</button></div>";
+      const b = $("#back-ch");
+      if (b) b.addEventListener("click", () => openOpening(opening.id));
+      return;
+    }
+    runMoveQuiz(root, opening, last, cap, "quiz", shortOpeningName(opening), () => openOpening(opening.id));
   }
 
   function runMoveQuiz(root, opening, ch, queue, kind, backLabel, onBack) {
-    let i = 0, correct = 0, done = false;
+    let i = 0, correct = 0, done = false, advanceTimer = null, skipFn = null, armTimer = null;
+    const shortName = shortOpeningName(opening);
+    function clearAdvance() {
+      if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+      if (armTimer) { clearTimeout(armTimer); armTimer = null; }
+      if (skipFn) { root.removeEventListener("click", skipFn); skipFn = null; }
+    }
+    function goNext() {
+      if (!done) return;
+      clearAdvance();
+      i++;
+      show();
+    }
+    function scheduleAdvance(ok) {
+      clearAdvance();
+      /* Arm skip after this pointer event finishes, so the move-tap doesn't skip the card. */
+      armTimer = setTimeout(function () {
+        skipFn = function (ev) {
+          if (ev && ev.target && ev.target.closest && ev.target.closest("#learn-show, #btn-back, .why-btn, #ch-end-nav")) return;
+          goNext();
+        };
+        root.addEventListener("click", skipFn);
+      }, 80);
+      if (ok) advanceTimer = setTimeout(goNext, 900);
+    }
     function show() {
+      clearAdvance();
       if (i >= queue.length) {
+        AppChrome.setTitle(shortName);
+        AppChrome.setBack(onBack);
         root.innerHTML =
-          "<div class=\"op-page\"><button type=\"button\" class=\"text-btn\" id=\"back-ch\">" + esc(backLabel) + "</button>" +
-          "<h2>" + (kind === "learn" ? "Chapter learned" : "Quiz result") + "</h2>" +
-          "<p>You got " + correct + " of " + queue.length + " right. Spaced repetition will bring the misses back first.</p>" +
-          chapterEndHTML(opening, ch) + "</div>";
-        $("#back-ch").addEventListener("click", onBack);
+          "<div class=\"op-page\">" +
+          "<h2>" + (kind === "learn" ? "Chapter complete" : "Quiz complete") + "</h2>" +
+          chapterEndHTML(opening, ch, { correct: correct, total: queue.length, complete: true }) + "</div>";
         bindChapterEnd(root, opening, ch, kind);
         return;
       }
@@ -802,15 +1008,15 @@
       const fen = window.Openings.fenAfter(pos.path.slice(0, -1));
       const want = pos.move;
       done = false;
+      AppChrome.setTitle(shortName);
+      AppChrome.setBack(onBack);
       root.innerHTML =
-        "<div class=\"op-page\"><button type=\"button\" class=\"text-btn\" id=\"back-ch\">" + esc(backLabel) + "</button>" +
-        "<h2>" + (kind === "learn" ? "Learn" : "Quiz") + " · " + esc(ch.name) + "</h2>" +
-        "<p class=\"cue-bar\">" + (i + 1) + " of " + queue.length + (want.idea ? " — " + esc((window.Practice && window.Practice.short ? window.Practice.short(want.idea, 90) : want.idea)) : " — your move") + "</p>" +
+        "<div class=\"op-page quiz-card\">" +
+        "<h2>" + esc(shortName) + "</h2>" +
+        "<p class=\"cue-bar\">" + esc(shortName) + " · " + (i + 1) + " of " + queue.length + "</p>" +
         "<div id=\"learn-board\" class=\"mini-board\"></div>" +
         "<div id=\"learn-fb\" class=\"drill-fb\" hidden></div>" +
-        "<div class=\"nav-row\"><button type=\"button\" id=\"learn-show\">Show answer</button>" +
-        "<button type=\"button\" id=\"learn-next\" hidden>Next</button></div></div>";
-      $("#back-ch").addEventListener("click", onBack);
+        "<div class=\"nav-row\"><button type=\"button\" class=\"btn\" id=\"learn-show\">Hint</button></div></div>";
       const chess = new Chess(fen);
       const board = new window.BoardUI($("#learn-board"), {
         flipped: opening.color === "black",
@@ -821,19 +1027,27 @@
           const mv = preview.move({ from: spec.from, to: spec.to, promotion: spec.promotion || "q" });
           if (!mv) return;
           done = true;
-          const ok = mv.uci === want.uci || (mv.from + mv.to + (mv.promotion || "")) === want.uci;
-          window.Openings.markBranch(window.Openings.branchKey(opening.id, ch.id, pos.pathUci), ok);
+          const played = mv.from + mv.to + (mv.promotion || "");
+          const exact = mv.uci === want.uci || played === want.uci;
+          const alts = (window.Openings.repertoireMovesAt && window.Openings.repertoireMovesAt(opening, fen)) || [];
+          const alt = alts.find((a) => a.uci === want.uci ? false : (a.uci === played || a.uci === mv.uci));
+          const ok = exact || !!alt;
+          const markCh = pos.chapterId || (pos.chapter && pos.chapter.id) || ch.id;
+          window.Openings.markBranch(window.Openings.branchKey(opening.id, markCh, pos.pathUci), exact);
           if (ok) correct++;
           chess.move(mv);
           board.setPosition(chess.fen(), mv);
           const fb = $("#learn-fb");
           fb.hidden = false;
           fb.className = "drill-fb " + (ok ? "ok" : "bad");
-          fb.innerHTML = ok
-            ? "<p>That’s the move. " + esc(want.idea || "") + "</p>"
-            : "<p>Not that one. The move in this line is <strong>" + esc(want.san) + "</strong>. " + esc(want.idea || "") + "</p>";
-          const next = $("#learn-next");
-          next.hidden = false;
+          fb.innerHTML = exact
+            ? "<p>That’s the move.</p>"
+            : (alt
+              ? "<p>Good move too. This card drills " + esc(want.san) + ".</p>"
+              : "<p>Not that one. This card drills " + esc(want.san) + ".</p>");
+          const hint = $("#learn-show");
+          if (hint) hint.hidden = true;
+          scheduleAdvance(ok);
         }
       });
       board.setPosition(fen, null);
@@ -847,11 +1061,11 @@
         const fb = $("#learn-fb");
         fb.hidden = false;
         fb.className = "drill-fb";
-        fb.innerHTML = "<p>The move is <strong>" + esc(want.san) + "</strong>. " + esc(want.idea || "") + "</p>";
-        const next = $("#learn-next");
-        next.hidden = false;
+        fb.innerHTML = "<p>The move is " + esc(want.san) + ".</p>";
+        const hint = $("#learn-show");
+        if (hint) hint.hidden = true;
+        scheduleAdvance(false);
       });
-      $("#learn-next").addEventListener("click", () => { i++; show(); });
     }
     show();
   }
@@ -892,8 +1106,8 @@
         root.innerHTML = "<div class=\"op-page\"><button type=\"button\" class=\"text-btn\" id=\"back-op\">← " + esc(opening.name) + "</button>" +
           "<h2>Which line am I in?</h2><p>You named " + correct + " of " + queue.length + " situations correctly.</p>" +
           "<div class=\"nav-row\"><button type=\"button\" class=\"primary\" id=\"again\">Again</button>" +
-          "<button type=\"button\" id=\"end-back\">Back to opening</button>" +
-          (first ? "<button type=\"button\" id=\"end-learn\">Learn " + esc(first.name) + "</button>" : "") +
+          "<button type=\"button\" class=\"btn\" id=\"end-back\">Back to opening</button>" +
+          (first ? "<button type=\"button\" class=\"btn\" id=\"end-learn\">Learn " + esc(first.name) + "</button>" : "") +
           "</div></div>";
         $("#back-op").addEventListener("click", () => openOpening(opening.id));
         $("#again").addEventListener("click", () => startWhichLine(opening));
@@ -929,7 +1143,7 @@
           fb.hidden = false;
           fb.className = "drill-fb " + (okMove ? "ok" : "bad");
           fb.innerHTML = (okMove ? "<p>That’s the move. " + esc(item.move.idea || item.plan || "") + "</p>" : "<p>The move in this line is <strong>" + esc(item.move.san) + "</strong>. " + esc(item.move.idea || item.plan || "") + "</p>") +
-            "<button type=\"button\" id=\"which-next\">Next</button>";
+            "<button type=\"button\" class=\"btn\" id=\"which-next\">Next</button>";
           $("#which-next").addEventListener("click", () => { i++; show(); });
         }
       });
@@ -1047,15 +1261,15 @@
     if (!chess) {
       root.innerHTML = "<div class=\"op-page\"><button type=\"button\" class=\"text-btn\" id=\"back-c\">← Clarity</button>" +
         "<h2>" + esc(pos.title) + "</h2><p>This position couldn’t be loaded.</p>" +
-        "<div class=\"nav-row\"><button type=\"button\" id=\"c-next\" " + (nextPos ? "" : "hidden") + ">Next drill</button>" +
-        "<button type=\"button\" id=\"c-back\">Back to the list</button></div></div>";
+        "<div class=\"nav-row\"><button type=\"button\" class=\"btn\" id=\"c-next\" " + (nextPos ? "" : "hidden") + ">Next drill</button>" +
+        "<button type=\"button\" class=\"btn\" id=\"c-back\">Back to the list</button></div></div>";
       $("#back-c").addEventListener("click", renderClarity);
       const n = $("#c-next"); if (n && nextPos) n.addEventListener("click", () => startClarityDrill(nextPos));
       $("#c-back").addEventListener("click", renderClarity);
       return;
     }
     const cue = words8(pos.movePrompt || "Play the plan.");
-    AppChrome.setTitle(pos.title);
+    AppChrome.setTitle("Drill");
     AppChrome.setBack(() => renderClarity());
     const whyHtml = ((pos.steps || []).map((s) => {
       const ans = (s.choices && s.choices[s.correct]) || "";
@@ -1072,11 +1286,11 @@
       "<div id=\"c-board\" class=\"mini-board\"></div>" +
       "<div id=\"c-fb\" class=\"drill-fb\" hidden></div>" +
       "<div class=\"nav-row\" id=\"c-nav\">" +
-      "<button type=\"button\" id=\"c-show\">Show answer</button>" +
-      "<button type=\"button\" id=\"c-again\" hidden>Again</button>" +
-      (nextPos ? "<button type=\"button\" id=\"c-next\" hidden>Next drill</button>" : "") +
-      "<button type=\"button\" id=\"c-play\" hidden>Play it out</button>" +
-      "<button type=\"button\" id=\"c-back\" hidden>Back to the list</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"c-show\">Show answer</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"c-again\" hidden>Again</button>" +
+      (nextPos ? "<button type=\"button\" class=\"btn\" id=\"c-next\" hidden>Next drill</button>" : "") +
+      "<button type=\"button\" class=\"btn\" id=\"c-play\" hidden>Play it out</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"c-back\" hidden>Back to the list</button>" +
       "</div></div>";
     $("#back-c").addEventListener("click", renderClarity);
     $("#c-why").addEventListener("click", () => {
@@ -1142,7 +1356,23 @@
   UI.init = async function (hooks) {
     UI.hooks = hooks || {};
     $$(".tab").forEach((t) => t.addEventListener("click", () => showTab(t.getAttribute("data-tab"))));
-    /* Opening and drill data load on first Learn/Drills visit, or when tests call UI.loadData. */
+    if (window.SCToday && window.SCToday.fillSettings) {
+      const sheet = document.querySelector(".sheet-card");
+      if (sheet) window.SCToday.fillSettings(sheet, {
+        onChange: function () { showTab("today"); },
+        onConnect: function () { showTab("today"); const el = document.getElementById("today-view"); if (el) window.SCToday.showConnect(el, todayOpts()); }
+      });
+    }
+    if (window.SCAccount && window.SCAccount.onChange) {
+      window.SCAccount.onChange(function () {
+        const today = document.getElementById("today-view");
+        if (today && !today.hidden && window.SCToday) window.SCToday.renderToday(today, todayOpts());
+        const sheet2 = document.querySelector(".sheet-card");
+        if (sheet2 && window.SCToday.fillSettings) window.SCToday.fillSettings(sheet2, { onChange: function () { showTab("today"); }, onConnect: function () { showTab("today"); const el = document.getElementById("today-view"); if (el) window.SCToday.showConnect(el, todayOpts()); } });
+      });
+    }
+    /* First screen is Today. Play and Train stay one tap away. */
+    showTab("today");
   };
   UI.loadData = loadData;
   UI.showTab = showTab;
@@ -1151,6 +1381,7 @@
   UI.renderFind = renderFind;
   UI.renderPircPlans = renderPircPlans;
   UI.chapterEndHTML = chapterEndHTML;
+  UI.shortOpeningName = shortOpeningName;
   UI.showTreeMap = showTreeMap;
   UI.startLearn = startLearn;
   UI.startClarityDrill = startClarityDrill;

@@ -158,6 +158,30 @@
       return c.fen();
     },
 
+    /* Every "us" repertoire move in this opening that can be played from fen (by piece placement). */
+    repertoireMovesAt(opening, fen) {
+      const place = String(fen || "").split(" ")[0];
+      const seen = {};
+      const out = [];
+      (opening.chapters || []).forEach((ch) => {
+        this.ourPositions(opening, ch).forEach((p) => {
+          const f = this.fenAfter(p.path.slice(0, -1));
+          if (String(f).split(" ")[0] !== place) return;
+          const u = p.move && p.move.uci;
+          if (!u || seen[u]) return;
+          seen[u] = true;
+          out.push({
+            san: p.move.san,
+            uci: u,
+            idea: p.move.idea || "",
+            chapterId: ch.id,
+            line: ch.name
+          });
+        });
+      });
+      return out;
+    },
+
     /* Live-game helper: given UCI history and play-as color, find a matching cue. */
     liveCue(uciHistory, playAs) {
       const want = playAs === "white" ? "white" : "black";
