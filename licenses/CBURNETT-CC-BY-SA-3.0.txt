@@ -1,0 +1,10 @@
+Cburnett chess piece set
+Copyright Colin M.L. Burnett
+License: Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Used here via the Lichess distribution of the set, in vendor/pieces/cburnett/.
+
+You are free to share and adapt the work, even commercially, provided you give
+appropriate credit, indicate if changes were made, and distribute any
+adaptations under the same license. The full legal code is at the URL above.

@@ -1,0 +1,463 @@
+{
+  "version": 1,
+  "title": "Clarity drill",
+  "intro": "Walk the five checks of the thinking routine on real positions, then play a move. The questions come first on purpose: don’t start calculating until you know the story. These are a paraphrase of GM Igor Smirnov’s public teaching, used on positions that match the problems that actually show up in your games.",
+  "credit": "Inspired by GM Igor Smirnov’s public teaching (Remote Chess Academy). Not affiliated with or endorsed by him or RCA.",
+  "positions": [
+    {
+      "id": "open-center-rousseau",
+      "title": "Center opening vs an uncastled king",
+      "from": "A typical test of the Rousseau, and the same open-center problem that has cost you your own games.",
+      "fen": "r1bqkbnr/pppp2pp/2n5/4pp2/2BPP3/5N2/PPP2PPP/RNBQK2R b KQkq - 0 4",
+      "side": "black",
+      "lastMove": {
+        "san": "d4",
+        "from": "d2",
+        "to": "d4"
+      },
+      "steps": [
+        {
+          "id": "evaluate",
+          "question": "What’s the story of this position?",
+          "choices": [
+            "The center is opening, both kings are still on their starting squares, and your f-pawn has already moved.",
+            "The position is closed and both sides should just develop slowly.",
+            "You’re already winning a piece, so the king doesn’t matter."
+          ],
+          "correct": 0,
+          "explain": "Material is even. The center is opening (d4 against …f5), and neither king has castled. That’s the whole story."
+        },
+        {
+          "id": "intent",
+          "question": "What did his last move, d4, want?",
+          "choices": [
+            "To castle queenside as fast as possible.",
+            "To open the center while your king is still on e8, and to challenge e5.",
+            "To trap your queen."
+          ],
+          "correct": 1,
+          "explain": "d4 opens lines in the middle. With your king still on e8, that’s a direct challenge, not a developing nothing-move."
+        },
+        {
+          "id": "forcing",
+          "question": "What’s the most useful forcing idea to look at first?",
+          "choices": [
+            "…h5, starting a flank attack.",
+            "…a6, asking the bishop to leave.",
+            "…fxe4, taking in the center and opening lines of your own."
+          ],
+          "correct": 2,
+          "explain": "Checks, captures, threats. …fxe4 is the capture that answers his central break. A flank pawn is the wrong first look."
+        },
+        {
+          "id": "worst",
+          "question": "If nothing were forcing, which of your pieces would you want to improve next?",
+          "choices": [
+            "The knight on c6 is your worst piece.",
+            "The king’s knight and the dark-squared bishop are still at home — they need to get out so you can castle.",
+            "The a8 rook should come to a6."
+          ],
+          "correct": 1,
+          "explain": "After the capture, …Nf6 and a bishop move, then castle, are how you finish the job. Don’t leave the king in the middle."
+        },
+        {
+          "id": "candidate",
+          "question": "You pick …fxe4. What’s the reply you have to respect?",
+          "choices": [
+            "He can ignore e4 and castle.",
+            "Nxe5, recapturing in the center and eyeing f7 and c6 — which is why …d5 or, in some lines, …Nxe5 comes next.",
+            "Qxd8, trading queens at once."
+          ],
+          "correct": 1,
+          "explain": "A candidate isn’t safe until you’ve looked at his most aggressive reply. After …fxe4, Nxe5 is the one to have an answer for."
+        }
+      ],
+      "goodMoves": [
+        "fxe4"
+      ],
+      "movePrompt": "Play …fxe4. Your f-pawn on f5 takes his pawn on e4, meeting d4 in the center.",
+      "feedbackGood": "…fxe4 is the right first capture (the pawn on f5 takes on e4). Next you meet Nxe5 with …d5 (or …Nxe5 if he has already castled). Get the king out of the middle as soon as the tactics allow.",
+      "feedbackBad": "The center is opening and your king is on e8. Take on e4 (…fxe4) and be ready for Nxe5. A flank move, or a slow developing move that leaves e5 and the king hanging, is how these positions get away from you."
+    },
+    {
+      "id": "hanging-queen",
+      "title": "Is anything of yours hanging?",
+      "from": "A tactical check that belongs in the routine every move — the same habit the live coach is built around.",
+      "fen": "r5k1/5pb1/2p1qnpp/p3N3/P2Pp3/2P1BP1P/Q5PK/4R3 w - - 0 26",
+      "side": "white",
+      "lastMove": "…Qa2 was not just played; look at the board as it is.",
+      "steps": [
+        {
+          "id": "evaluate",
+          "question": "What’s the first thing to notice?",
+          "choices": [
+            "You’re a queen up, so any move is fine.",
+            "Several pieces are loose, and king safety is a little airy for both sides — start by asking what’s hanging.",
+            "The game is a dead draw."
+          ],
+          "correct": 1,
+          "explain": "Before you look for a plan, take inventory: material, kings, and loose pieces."
+        },
+        {
+          "id": "intent",
+          "question": "What should you ask about his last few moves?",
+          "choices": [
+            "Whether anything of yours is now under fire on your side of the board.",
+            "Whether you can castle.",
+            "Whether to start an h-pawn storm."
+          ],
+          "correct": 0,
+          "explain": "‘What did his last move want?’ always includes: is anything of yours now hanging?"
+        },
+        {
+          "id": "forcing",
+          "question": "Which forcing look comes first?",
+          "choices": [
+            "Quiet improving moves for the bishop.",
+            "Checks, captures, and threats — including captures of your own loose pieces, and captures you can make.",
+            "Pushing the h-pawn."
+          ],
+          "correct": 1,
+          "explain": "Scan forcing moves first. That includes noticing that your queen on a2 can be taken."
+        },
+        {
+          "id": "worst",
+          "question": "Your queen on a2 is loose. What’s the right kind of thought?",
+          "choices": [
+            "Leave it there and attack with another piece.",
+            "It’s your most exposed piece — save it or use it to take something just as valuable.",
+            "Trade it for a knight on principle."
+          ],
+          "correct": 1,
+          "explain": "A hanging queen is not a ‘worst piece to improve.’ It’s a piece that has to be dealt with right now."
+        },
+        {
+          "id": "candidate",
+          "question": "Before you pick a move, what’s the test?",
+          "choices": [
+            "If I leave the queen, can he take it for free or for too little? If yes, the move isn’t safe.",
+            "If the queen looks active, the move is good.",
+            "If I have more attackers than defenders on his king, nothing else matters."
+          ],
+          "correct": 0,
+          "explain": "Choose a candidate, then try to break it. If he can take the queen, the candidate fails."
+        }
+      ],
+      "goodMoves": [
+        "Qb3",
+        "Qb1",
+        "Qc4",
+        "Qb2",
+        "Qa3",
+        "Qa1",
+        "Qe2",
+        "Qd2",
+        "Qc2",
+        "Qf2",
+        "Qxe6",
+        "Qd5"
+      ],
+      "movePrompt": "Save the queen, or take something that makes leaving it worthwhile. Don’t leave it hanging.",
+      "feedbackGood": "You dealt with the loose queen. That’s the routine working: notice what’s hanging before you look for a plan.",
+      "feedbackBad": "The queen on a2 is loose. A move that doesn’t save it, or take enough in return, fails the last check of the routine: try to break your own candidate."
+    },
+    {
+      "id": "g3-too-early",
+      "title": "After 1.g3 — don’t start the h-pawn yet",
+      "from": "A very common first move in flank openings.",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPP1P/RNBQKBNR b KQkq - 0 1",
+      "side": "black",
+      "lastMove": "g3",
+      "steps": [
+        {
+          "id": "evaluate",
+          "question": "What’s going on?",
+          "choices": [
+            "He has started a kingside fianchetto. The center is still empty and both kings are at home.",
+            "He has already locked the center, so a flank attack is on.",
+            "You’re lost if you don’t push …h5 at once."
+          ],
+          "correct": 0,
+          "explain": "One pawn move. No pieces out, no locked center, both kings in the middle."
+        },
+        {
+          "id": "intent",
+          "question": "What does 1.g3 want?",
+          "choices": [
+            "To put the bishop on g2 and pressure the long diagonal.",
+            "To force you to play …h5.",
+            "To prevent you from ever taking the center."
+          ],
+          "correct": 0,
+          "explain": "It’s a fianchetto. He wants Bg2 and a later grab at the center or the long diagonal — not a reason for you to storm the h-file on move one."
+        },
+        {
+          "id": "forcing",
+          "question": "Are there forcing moves you have to play right now?",
+          "choices": [
+            "No. Nothing is checking you or hanging. Take a share of the center.",
+            "Yes: …h5 is forcing.",
+            "Yes: …Rh7 is forcing."
+          ],
+          "correct": 0,
+          "explain": "No checks, no captures. So you develop and take the center (…e5, …d5, or a Pirc/Modern setup)."
+        },
+        {
+          "id": "worst",
+          "question": "What’s the piece-and-pawn plan, not a single piece?",
+          "choices": [
+            "Get pawns into the center and develop, then castle.",
+            "Swing the h-pawn and the rook before anything else.",
+            "Leave the bishop on f8 forever."
+          ],
+          "correct": 0,
+          "explain": "Every piece still has to get out. The center is how they get the room to do it."
+        },
+        {
+          "id": "candidate",
+          "question": "If you chose …h5 here, how does that candidate break?",
+          "choices": [
+            "It doesn’t — …h5 is always right against a fianchetto.",
+            "He can ignore it, take the center (c4, d4, e4), and your king is still in the middle of an opening game. That’s the same pattern as in your h-file losses.",
+            "He has to play g4, so you’re winning."
+          ],
+          "correct": 1,
+          "explain": "The h-file checklist starts with a locked or stable center and a safe king. Neither is true here."
+        }
+      ],
+      "goodMoves": [
+        "e5",
+        "d5",
+        "g6",
+        "Nf6",
+        "c5",
+        "d6",
+        "e6",
+        "c6"
+      ],
+      "movePrompt": "Take a share of the center, or start the Pirc/Modern setup. Don’t push …h5.",
+      "feedbackGood": "That’s the right first idea: the center, or a normal developing setup. Save the h-pawn for after the center is fixed and your king is safe.",
+      "feedbackBad": "…h5 is too early. The center is wide open and your king is still on e8. Play …e5, …d5, or a Pirc/Modern setup (…g6, …d6)."
+    },
+    {
+      "id": "diag-a8",
+      "title": "The long diagonal — is a8 hanging?",
+      "from": "A position like the ones vs a bishop on g2, where the a8 rook has been taken right after an h-pawn push.",
+      "fen": "r1bqk2r/p1pnbppp/1p1p1n2/PP2p3/8/6P1/1BPPPPBP/RN1QK1NR b KQkq - 2 7",
+      "side": "black",
+      "lastMove": "Bb2 / Bg2 already in place",
+      "steps": [
+        {
+          "id": "evaluate",
+          "question": "What’s the hidden story?",
+          "choices": [
+            "Your rook on a8 sits on the same diagonal as his bishop on g2, and the pawn on b7 has moved.",
+            "Nothing is going on; just develop.",
+            "You’re already mated."
+          ],
+          "correct": 0,
+          "explain": "The long diagonal is open toward a8. That’s a hanging-piece story, not a quiet one."
+        },
+        {
+          "id": "intent",
+          "question": "What do those fianchetto bishops want?",
+          "choices": [
+            "To wait in the corner forever.",
+            "To rake the long diagonals — a8 and h8 are the squares to worry about.",
+            "To trade themselves for your knights as soon as possible."
+          ],
+          "correct": 1,
+          "explain": "A bishop on g2 or b2 is a sniper. Ask what’s on its diagonal every move."
+        },
+        {
+          "id": "forcing",
+          "question": "What’s the forcing question?",
+          "choices": [
+            "Can he take on a8 if I leave the diagonal, or if I push a pawn that opens it further?",
+            "Is …h5 forcing?",
+            "Can I castle long?"
+          ],
+          "correct": 0,
+          "explain": "Captures first. The capture that matters is Bxa8, if you let it happen."
+        },
+        {
+          "id": "worst",
+          "question": "Which piece needs the most care right now?",
+          "choices": [
+            "The rook on a8, and any pawn move that opens the diagonal to it.",
+            "The knight on g8.",
+            "The h-pawn."
+          ],
+          "correct": 0,
+          "explain": "The rook is the piece that’s actually in danger. Improve its safety, or close the diagonal, before you look at a wing attack."
+        },
+        {
+          "id": "candidate",
+          "question": "If your candidate is …h5, how do you try to break it?",
+          "choices": [
+            "Ask whether …h5 (or any other move) leaves a8 hanging to the g2 bishop.",
+            "You don’t — the h-pawn always comes first.",
+            "Only check whether you can castle."
+          ],
+          "correct": 0,
+          "explain": "That’s checklist item 6: is anything hanging before you push? In your games, that rook on a8 was taken more than once."
+        }
+      ],
+      "goodMoves": [
+        "Rb8",
+        "c6",
+        "Bb7"
+      ],
+      "movePrompt": "Move the rook, or block the diagonal (…c6 or …Bb7). Castling does not save a8.",
+      "feedbackGood": "You treated a8 as a real problem — the rook moved or the diagonal closed. That’s the long-diagonal check, the same one Wes will flag in live games.",
+      "feedbackBad": "The rook on a8 can be taken right now by the bishop on g2. Castling doesn’t save it. Play …Rb8, …c6, or …Bb7."
+    },
+    {
+      "id": "worst-piece",
+      "title": "Nothing is forcing — improve the worst piece",
+      "from": "A quiet Classical-style moment, the kind where people start ‘doing something’ on the flank instead of finishing development.",
+      "fen": "r2q1rk1/ppp1ppbp/2np1np1/8/3PP1b1/2N1BN2/PPPQBPPP/R4RK1 b - - 9 8",
+      "side": "black",
+      "lastMove": "Qd2",
+      "steps": [
+        {
+          "id": "evaluate",
+          "question": "What’s going on?",
+          "choices": [
+            "Both kings are safe, material is even, and the center is still fluid. This is a Classical Pirc.",
+            "You’re being mated on the h-file.",
+            "You have to sacrifice a piece at once."
+          ],
+          "correct": 0,
+          "explain": "Quiet, equal, both kings short. The story is ‘find a plan in the center,’ not ‘storm a king.’"
+        },
+        {
+          "id": "intent",
+          "question": "What did Qd2 want?",
+          "choices": [
+            "To connect the rooks, support the center, and maybe go to f4 or h6 later.",
+            "To resign.",
+            "To force you to play …h5."
+          ],
+          "correct": 0,
+          "explain": "A useful developing move, not a direct threat. You don’t have to panic."
+        },
+        {
+          "id": "forcing",
+          "question": "Is there a forcing move you must play?",
+          "choices": [
+            "No check or hanging piece forces you. …e5 is the useful central break to look at, not a desperate tactic.",
+            "You must take on f3 this move or lose a piece.",
+            "You must play …h5."
+          ],
+          "correct": 0,
+          "explain": "Scan forcing moves, then when nothing is forced, pick the plan. …e5 is the break, not a panic capture."
+        },
+        {
+          "id": "worst",
+          "question": "Which idea improves your position most?",
+          "choices": [
+            "The g7 bishop is biting on its own pawn at d4 — …e5 (or a trade that opens the diagonal) puts it to work.",
+            "The a8 rook should go to a6.",
+            "The king should walk to h8."
+          ],
+          "correct": 0,
+          "explain": "The worst ‘piece’ here is the bishop that’s still locked in. The pawn break is how you improve it."
+        },
+        {
+          "id": "candidate",
+          "question": "If you pick …e5, what do you check before you play it?",
+          "choices": [
+            "His captures on e5 and the push d5 — and whether those replies are fine for you.",
+            "Nothing; pawn breaks don’t need a check.",
+            "Only whether you can play …h5 next."
+          ],
+          "correct": 0,
+          "explain": "Try to break your own candidate. After …e5, dxe5 or d5 are the replies to have an answer for. They’re both playable."
+        }
+      ],
+      "goodMoves": [
+        "e5"
+      ],
+      "movePrompt": "Play the central break that wakes up the g7 bishop.",
+      "feedbackGood": "…e5 is the plan. Same-side castling, nothing forcing: improve the bishop by opening the center, then play where your pawns point.",
+      "feedbackBad": "Nothing is forcing, so you improve the worst piece. The g7 bishop wants …e5. An h-pawn storm or a random wing move isn’t the routine here."
+    },
+    {
+      "id": "candidate-break",
+      "title": "Pick a move, then try to break it",
+      "from": "A ‘looks active’ queen move that fails the last check of the routine.",
+      "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+      "side": "black",
+      "lastMove": "Nf3",
+      "steps": [
+        {
+          "id": "evaluate",
+          "question": "What’s going on?",
+          "choices": [
+            "An ordinary Open Game: he has developed a knight and hit e5. You should defend it or develop around it.",
+            "You’re already winning.",
+            "The position is so sharp that only a queen check works."
+          ],
+          "correct": 0,
+          "explain": "Move two. Even, open, one threat: the pawn on e5 is attacked."
+        },
+        {
+          "id": "intent",
+          "question": "What did Nf3 want?",
+          "choices": [
+            "To hit e5 and get ready to castle.",
+            "To sacrifice the knight.",
+            "To stop you from ever developing a knight."
+          ],
+          "correct": 0,
+          "explain": "A normal developing move that also attacks e5."
+        },
+        {
+          "id": "forcing",
+          "question": "What’s actually under fire?",
+          "choices": [
+            "Your e5 pawn.",
+            "Your queen.",
+            "Your king, by an immediate mate."
+          ],
+          "correct": 0,
+          "explain": "One capture is on the table: Nxe5, if you ignore it."
+        },
+        {
+          "id": "worst",
+          "question": "What’s a useful developing idea?",
+          "choices": [
+            "…Nc6, defending e5, or …Nf6 (the Petrov), hitting e4.",
+            "…Qh4, because an early queen check is always strong.",
+            "…Ke7, to defend e5 with the king."
+          ],
+          "correct": 0,
+          "explain": "Develop and deal with the threat. The early queen raid is the trap this drill is about."
+        },
+        {
+          "id": "candidate",
+          "question": "If someone suggested …Qh4, how do you break that candidate?",
+          "choices": [
+            "Look at Nxh4 — he just takes the queen. The check on h4 isn’t even a check that wins anything.",
+            "You can’t break it; the queen always comes out early.",
+            "Only check whether you can castle after it."
+          ],
+          "correct": 0,
+          "explain": "That’s the whole last step: try to break your own move. …Qh4 loses the queen to Nxh4."
+        }
+      ],
+      "goodMoves": [
+        "Nc6",
+        "Nf6",
+        "d6",
+        "Bd6",
+        "Qe7",
+        "f6"
+      ],
+      "movePrompt": "Defend e5 or hit e4. Don’t play the early queen raid.",
+      "feedbackGood": "A normal developing move. You defended e5 or hit e4, and you didn’t hang the queen.",
+      "feedbackBad": "…Qh4 fails the last check: he takes the queen. Play …Nc6, …Nf6, or another move that deals with e5."
+    }
+  ]
+}

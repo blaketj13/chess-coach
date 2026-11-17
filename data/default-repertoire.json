@@ -1,0 +1,85 @@
+{
+  "lockedWhite": true,
+  "lockedBlack": true,
+  "rankedWhiteVsE5": [
+    {
+      "rank": 1,
+      "id": "ponziani",
+      "name": "Ponziani",
+      "moves": "1.e4 e5 2.Nf3 Nc6 3.c3, aiming for d4"
+    },
+    {
+      "rank": 2,
+      "id": "vienna",
+      "name": "Vienna (with the Vienna Gambit)",
+      "moves": "1.e4 e5 2.Nc3, then 3.f4 for the gambit. Don\u2019t mix this with c3."
+    },
+    {
+      "rank": 3,
+      "id": "scotch",
+      "name": "Scotch",
+      "moves": "1.e4 e5 2.Nf3 Nc6 3.d4"
+    }
+  ],
+  "white": {
+    "family": "c3-d4",
+    "familyId": "white-c3d4",
+    "vs": {
+      "e5": {
+        "id": "ponziani",
+        "name": "Ponziani",
+        "moves": "1.e4 e5 2.Nf3 Nc6 3.c3, aiming for d4"
+      },
+      "c5": {
+        "id": "alapin",
+        "name": "Alapin Sicilian",
+        "moves": "1.e4 c5 2.c3, aiming for d4"
+      },
+      "e6": {
+        "id": "white-c3d4",
+        "chapterId": "french-advance",
+        "name": "French Advance",
+        "moves": "1.e4 e6 2.d4 d5 3.e5 c5 4.c3"
+      },
+      "c6": {
+        "id": "white-c3d4",
+        "chapterId": "caro-advance",
+        "name": "Caro-Kann Advance",
+        "moves": "1.e4 c6 2.d4 d5 3.e5 (c3 when he plays ...c5)"
+      },
+      "d5": {
+        "id": "white-c3d4",
+        "chapterId": "scandi-d4",
+        "name": "Scandinavian with d4",
+        "moves": "1.e4 d5 2.exd5 Qxd5 3.Nc3 and 4.d4 (not early c3)"
+      }
+    }
+  },
+  "blackCandidates": [
+    {
+      "id": "pirc",
+      "name": "Pirc Defence",
+      "vs": "1.e4, and the same setup vs 1.d4 / 1.c4 / 1.b4 / 1.g3",
+      "note": "Setup is easy; the work is the attacking plan after it. See the Fianchetto module and the Pirc & Modern plan chapters."
+    },
+    {
+      "id": "rousseau",
+      "name": "Rousseau Gambit",
+      "vs": "1.e4 e5 2.Nf3 Nc6 3.Bc4 f5",
+      "note": "If he plays 3.Bb5 instead of 3.Bc4, the cousin is the Schliemann (3...f5). If he plays 3.d4, that\u2019s a Scotch \u2014 not a Rousseau."
+    },
+    {
+      "id": "caro",
+      "name": "Caro-Kann",
+      "vs": "1.e4 only",
+      "note": "Use the Pirc/Modern setup against everything that isn\u2019t 1.e4."
+    }
+  ],
+  "blackVsNonE4": {
+    "id": "pirc",
+    "name": "Pirc / Modern setup",
+    "vs": "1.d4, 1.c4, 1.b4, 1.g3"
+  },
+  "doNotMix": "Do not combine c3 with an early f4 in the same game. c3 wants a slow d4 center and takes c3 from the knight; the Vienna Gambit needs Nc3 and a fast f4. Together they loosen the kingside (e3 and g1) without either plan working, and he can hit \u2026d5 while your king is still on e1.",
+  "featuredModule": "fianchetto"
+}

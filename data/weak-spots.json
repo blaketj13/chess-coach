@@ -1,0 +1,24 @@
+{
+  "source": "Your own games only. No other player's data.",
+  "title": "Know your weak spots",
+  "spots": [
+    {
+      "when": "As Black vs the London",
+      "record": "4\u201317 in 21",
+      "winRate": 19.0,
+      "persona": "solid-defender"
+    },
+    {
+      "when": "As Black vs 1.b4",
+      "record": "6\u201320 in 27",
+      "winRate": 22.2,
+      "persona": "fianchetto-grinder"
+    },
+    {
+      "when": "As White vs the Modern",
+      "record": "9\u201317 in 26",
+      "winRate": 34.6,
+      "persona": "fianchetto-grinder"
+    }
+  ]
+}

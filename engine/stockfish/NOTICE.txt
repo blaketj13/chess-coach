@@ -1,0 +1,24 @@
+Stockfish.js 19.0.1 — lite, single-threaded WebAssembly build
+Files in this folder (stockfish-19-lite-single.js and stockfish-19-lite-single.wasm)
+are unmodified copies of the upstream release assets.
+
+npm package: stockfish@19.0.1
+  https://www.npmjs.com/package/stockfish/v/19.0.1
+
+stockfish.js / npm release:
+  https://github.com/nmrugg/stockfish.js/releases/tag/v19.0.1
+
+Official Stockfish 19 source tag (sf_19, commit edb0d9db6731067ec50ce619ff372b463bc4dd5d):
+  https://github.com/official-stockfish/Stockfish/tree/sf_19
+
+License: GNU General Public License version 3. The full text is in COPYING
+in this same folder.
+
+Stockfish.js is © 2026 Chess.com, LLC, and is based on Stockfish
+© T. Romstad, M. Costalba, J. Kiiski, G. Linscott and other contributors.
+Neural nets by Chris Bao (sscg13).
+https://tests.stockfishchess.org/nns?network_name=nn-61e7af4bb97d
+
+These files must be kept in this folder, loaded at runtime as a Web Worker,
+and spoken to only over UCI messages. Do not minify, bundle, or patch them
+into the app's own JavaScript.

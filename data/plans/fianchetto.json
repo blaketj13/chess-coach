@@ -1,0 +1,1405 @@
+{
+  "id": "fianchetto",
+  "title": "Fianchetto attacks",
+  "priority": true,
+  "version": 2,
+  "credit": "Attacking ideas are inspired by GM Igor Smirnov’s public teaching (Remote Chess Academy). Not affiliated with or endorsed by him or RCA.",
+  "why": "This is the hardest part of playing against a fianchetto. He opened 1.b4 against you 25 times as White (you're 3–21–1) and 1.g3 24 times (4–19–1). Almost every one of those games featured a bishop on b2 or g2, and sometimes both. The setup isn't the problem — it's what to do after it. This module has two jobs: how to attack his fianchettoed king, and how to use your own g7 bishop in the Pirc and Modern.",
+  "stats": {
+    "source": "Positions taken from public games in this fianchetto structure.",
+    "g3": {
+      "games": 24,
+      "wins": 4,
+      "draws": 1,
+      "losses": 19,
+      "bg2": 24
+    },
+    "b4": {
+      "games": 25,
+      "wins": 3,
+      "draws": 1,
+      "losses": 21,
+      "bb2": 20
+    },
+    "doubleFianchetto": 13,
+    "note": "In 13 of those 49 games he played both Bb2 and Bg2. The long diagonal can cut both ways.",
+    "hFile": {
+      "games": 28,
+      "wins": 5,
+      "draws": 1,
+      "losses": 22,
+      "pawnAlone": {
+        "n": 20,
+        "of": 28,
+        "text": "In 20 of the 28 games the h-pawn went forward without a queen, rook, or minor piece ready to follow it."
+      },
+      "uncastledOpenCenter": {
+        "n": 21,
+        "of": 28,
+        "text": "In 21 of 28, your king was still uncastled and the center was still open when you started the storm."
+      },
+      "bishopTraded": {
+        "n": 3,
+        "of": 25,
+        "text": "You only traded off his fianchetto bishop in 3 of 25 games where it was on the board. That bishop is the key defender of h3 and f3."
+      },
+      "source": "Positions taken from your public games in which the h-pawn went forward as a storm (28 games, 5–1–22).",
+      "note": "The idea is right. The storm keeps getting stopped because the pawn usually goes alone, while your king is still in the middle of an open center, and his g7/g2 bishop is still there."
+    }
+  },
+  "parts": [
+    {
+      "id": "attack-theirs",
+      "title": "Part 1 — Attacking a fianchettoed king",
+      "intro": "A king behind a bishop on g2 (or g7) looks safe, and it is — until that bishop is gone or the h-file opens. The attack is a recipe, not a random pawn storm. Do the steps in order. Skip the first one and the rest usually backfires, which is what has been happening in your own games.",
+      "vsAnthony": "Against 1.g3 he almost always plays Bg2 and short-castles. That’s a fianchettoed king, and the recipe below applies. Against 1.b4 the bishop goes to b2. That bishop is a sniper on the long diagonal, but his king usually still castles short — and he often adds g3 and Bg2 later (a double fianchetto). Treat Bb2 as a long-diagonal threat you must check before you move, and treat Bg2 as the key defender of his king once he has castled short.",
+      "principles": [
+        {
+          "id": "center-first",
+          "name": "Control the center first",
+          "smirnov": "attack-center",
+          "cue": "A wing attack only works if the center is stable. If he can blow it open, your king (or your hanging pieces) will feel it first.",
+          "lesson": "This is the step most often skipped in your games vs 1.g3. An early ...h5, before ...e5 or ...d5 and before your pieces are out, gives him a free game in the middle while your rook on h8 and the pawn on h5 become targets. Occupy or close the center (...e5, ...d5, or a fixed pawn chain) first. Then the h-pawn lever has a point. Fischer’s model game below does exactly this: he fixes the center with e5, and only then starts h4.",
+          "rule": "No h-pawn storm until the center is closed or firmly held."
+        },
+        {
+          "id": "trade-bishop",
+          "name": "Trade off the fianchetto bishop",
+          "smirnov": "remove-defender",
+          "cue": "The bishop on g2 is the key defender. If you can trade it with ...Bh3 and ...Qd7 (or, as White, Bh6 and Qd2), his king becomes a lot weaker.",
+          "lesson": "The recipe is simple: queen to d7 (or d2), bishop to h3 (or h6), and offer the trade. If he takes, you recapture and the dark squares around his king (f3, g2, h3) are soft. If he avoids the trade, that bishop is often stuck or your bishop sits on a powerful attacking square anyway. Don’t force this the moment both sides have castled if the center is still tense — develop first, then look for ...Qd7 and ...Bh3 when your other pieces can follow up.",
+          "rule": "Queen to d7, bishop to h3. The g2 bishop is the one you want off the board."
+        },
+        {
+          "id": "h-lever",
+          "name": "The h-pawn lever: ...h5-h4 (or h4-h5)",
+          "smirnov": "sac-lines",
+          "cue": "Once the center is fixed, the h-pawn can pry open the h-file toward his king.",
+          "lesson": "Push the h-pawn two squares, then one more, and be ready to recapture toward the king so a rook can use the file. This is not the same as throwing ...h5 on move one, or pushing h4–h5 with the king still on e1 and no pieces backing the file. In your 28 h-pawn storms in your own games, the pawn went alone 20 times; that’s why he can stop it with h3, g4, or a hit in the center. The lever is for after the six-point checklist below is done: center fixed, your king safe (ideally on the other side), his g7/g2 bishop traded or ready to be traded (Qd2+Bh6 or ...Qd7+...Bh3), and queen + rook + one more piece ready before the second push. If he closes the file with h3, g4, ...h6, or ...g5, switch to the f-pawn lever or the center. And always look at the long diagonal (the a8 or a1 rook) before you push.",
+          "rule": "H-pawn after the checklist: center, king, bishop trade, backup on the file."
+        },
+        {
+          "id": "h-checklist",
+          "name": "The h-file checklist (from your own games)",
+          "smirnov": "outnumber",
+          "cue": "Before you push the h-pawn, and again before the second push, run the six checks. Wes will name whichever ones are still missing.",
+          "rule": "Center, king, trade the bishop, backup, switch if he closes the file, check the long diagonal.",
+          "lesson": "This is the pattern in the 28 storms (5–1–22). 1) Center locked or stable. 2) Your king safe, ideally on the other side. 3) Trade his fianchetto bishop first with Qd2+Bh6 or ...Qd7+...Bh3. 4) Queen, rook, and one more piece ready before the second push. 5) If he closes the file (h3, g4, ...h6, ...g5), switch to the f-pawn lever or the center. 6) Look at hanging pieces — especially the rook on a8 or a1 — on the long diagonal before you push. When you play an h-pawn move against the Wing Gambiteer, Wes will tell you which of these are not yet done.",
+          "items": [
+            {
+              "id": "center",
+              "n": 1,
+              "name": "Center locked or stable",
+              "rule": "The center is closed or firmly held. If he can blow it open with ...d5 / ...e5 / c4 / e4, the wing attack will fall apart.",
+              "smirnov": "attack-center"
+            },
+            {
+              "id": "king",
+              "n": 2,
+              "name": "Your king is safe, ideally on the other side",
+              "rule": "Castle first — queenside if you’re attacking his kingside — so he can’t counterattack your uncastled king while the h-file opens.",
+              "smirnov": "open-center"
+            },
+            {
+              "id": "trade",
+              "n": 3,
+              "name": "Trade the fianchetto bishop first",
+              "rule": "Qd2 and Bh6 as White, or ...Qd7 and ...Bh3 as Black, before or alongside the h-pawn. That bishop guards h3 and f3.",
+              "smirnov": "remove-defender"
+            },
+            {
+              "id": "backup",
+              "n": 4,
+              "name": "Queen, rook, and one more piece ready before the second push",
+              "rule": "The h-pawn only opens the file. You need the queen, a rook on the h-file, and one more piece (a knight to g5/g4, or the bishop that made the trade) before you push the pawn a second time.",
+              "smirnov": "outnumber"
+            },
+            {
+              "id": "closed",
+              "n": 5,
+              "name": "If he closes the file, switch",
+              "rule": "If he plays h3, g4, ...h6, or ...g5 and keeps the file closed, stop the h-pawn and switch to the f-pawn lever (...f5 / f4) or break in the center.",
+              "smirnov": "dont-grab"
+            },
+            {
+              "id": "diag",
+              "n": 6,
+              "name": "Check hanging pieces on the long diagonal",
+              "rule": "Look at a8 and a1 (and the queen) before you push. His bishop on g2 or b2 can take a rook the moment the diagonal opens.",
+              "smirnov": "dont-grab"
+            }
+          ]
+        },
+        {
+          "id": "count",
+          "name": "Count attackers against defenders",
+          "smirnov": "outnumber",
+          "cue": "Before you sacrifice or smash through on h-file, count. You want more pieces hitting his king than he has covering it.",
+          "lesson": "A useful attacking question, in Smirnov’s terms: do you outnumber the defenders? The g2 bishop counts as a defender until it’s traded. Your queen, a rook on the h-file, a knight on g4, and a bishop on h3 are typical attackers. If the count isn’t in your favor yet, bring one more piece up instead of pushing another pawn or sacrificing.",
+          "rule": "If you don’t have more attackers than he has defenders, don’t break the position open yet."
+        },
+        {
+          "id": "stop-and-center",
+          "name": "When to stop and play in the center instead",
+          "smirnov": "dont-grab",
+          "cue": "If the wing attack isn’t ready, switch back to the center. A good ...d5 or ...e5 is often stronger than another h-pawn push.",
+          "lesson": "Stop the wing attack when: the center is still open; his bishop on g2 or b2 is raking a hanging rook (especially a8); you’re behind in development; or the attacker–defender count isn’t there. In those cases, occupy or break in the center, tuck hanging pieces off the long diagonal, and only then come back to the king. Several of your losses in these structures on 1.g3 and 1.b4 were this exact moment — the h-pawn went forward while a rook or a central break was the real move.",
+          "rule": "If the long diagonal is on fire or the center is loose, play there first."
+        }
+      ],
+      "hFileIntro": "You already reach for the h-file against a fianchettoed king, and the idea is right. In 28 of those games the h-pawn went forward as a storm, and the score was 5–1–22. The pawn usually went alone (20/28), your king was still uncastled in an open center (21/28), and you only traded his fianchetto bishop in 3 of 25 games where it was on the board. Run this six-point checklist before the first push, and again before the second."
+    },
+    {
+      "id": "own-fianchetto",
+      "title": "Part 2 — Using your own fianchetto (Pirc and Modern)",
+      "intro": "In the Pirc and the Modern your bishop on g7 is the star. It doesn’t attack by sitting there. It attacks when you open its diagonal with a pawn break, usually ...e5 or ...c5, and sometimes ...b5 if he has castled long. 1.b4 and 1.g3 are comfortable for this setup: you can still put the bishop on g7 and strike at the center. That’s also why the Pirc is your answer when he doesn’t play 1.e4.",
+      "plans": [
+        {
+          "id": "use-g7",
+          "name": "The g7 bishop needs an open diagonal",
+          "smirnov": "least-active",
+          "lesson": "If the bishop is biting on your own pawn or on a closed chain, it’s your worst piece. Trade a central pawn (...e5 or ...c5) so the diagonal opens toward his queenside or his king."
+        },
+        {
+          "id": "break-e5",
+          "name": "The ...e5 break",
+          "smirnov": "attack-center",
+          "lesson": "Play ...e5 when you can support it (usually ...Nbd7 or ...Nc6, and often after ...O-O). If he takes, the long diagonal opens at once. If he pushes past (d5 or e5), the center closes and you can switch to a kingside or ...f5 plan."
+        },
+        {
+          "id": "break-c5",
+          "name": "The ...c5 break",
+          "smirnov": "attack-center",
+          "lesson": "Play ...c5 when his d-pawn is the hook, or when you want Sicilian-style play on the c-file. It’s the usual answer to a big white center (including an Austrian f4 setup). Don’t forget ...Nc6 and ...Qb6 or ...Qa5 as follow-ups."
+        },
+        {
+          "id": "vs-flank",
+          "name": "The same setup vs 1.g3, 1.b4, 1.d4 and 1.c4",
+          "smirnov": "invade",
+          "lesson": "You don’t need a new opening for flank openings. ...g6, ...Bg7, ...d6, ...Nf6, castle, then ...e5 or ...c5. Against 1.b4, watch the b2 bishop’s diagonal before you move the a8-rook. Against 1.g3, the recipe in Part 1 is how you actually attack his king after the setup."
+        }
+      ]
+    }
+  ],
+  "modelGames": [
+    {
+      "id": "fischer-myagmarsuren-1967",
+      "white": "Robert J. Fischer",
+      "black": "Lhamsuren Myagmarsuren",
+      "event": "Sousse Interzonal",
+      "site": "Sousse, Tunisia",
+      "date": "1967.10.15",
+      "round": "3",
+      "result": "1-0",
+      "eco": "A07 / C00",
+      "source": "Public PGN of Fischer–Myagmarsuren, Sousse Interzonal 1967 (widely published; moves checked against multiple public sources including the Sousse Interzonal record).",
+      "url": "https://www.chessgames.com/perl/chessgame?gid=1044267",
+      "sans": [
+        "e4",
+        "e6",
+        "d3",
+        "d5",
+        "Nd2",
+        "Nf6",
+        "g3",
+        "c5",
+        "Bg2",
+        "Nc6",
+        "Ngf3",
+        "Be7",
+        "O-O",
+        "O-O",
+        "e5",
+        "Nd7",
+        "Re1",
+        "b5",
+        "Nf1",
+        "b4",
+        "h4",
+        "a5",
+        "Bf4",
+        "a4",
+        "a3",
+        "bxa3",
+        "bxa3",
+        "Na5",
+        "Ne3",
+        "Ba6",
+        "Bh3",
+        "d4",
+        "Nf1",
+        "Nb6",
+        "Ng5",
+        "Nd5",
+        "Bd2",
+        "Bxg5",
+        "Bxg5",
+        "Qd7",
+        "Qh5",
+        "Rfc8",
+        "Nd2",
+        "Nc3",
+        "Bf6",
+        "Qe8",
+        "Ne4",
+        "g6",
+        "Qg5",
+        "Nxe4",
+        "Rxe4",
+        "c4",
+        "h5",
+        "cxd3",
+        "Rh4",
+        "Ra7",
+        "Bg2",
+        "dxc2",
+        "Qh6",
+        "Qf8",
+        "Qxh7+"
+      ],
+      "part": "attack-theirs",
+      "teaches": [
+        "center-first",
+        "h-lever",
+        "count",
+        "trade-bishop"
+      ],
+      "summary": "The model for ‘center first, then the h-pawn.’ Fischer plays a King’s Indian Attack (he is the one with Bg2), fixes the center with 8.e5, and only then starts 11.h4. He later uses Bh3, piles pieces toward the king, and opens the h-file with 27.h5. Black’s king is not behind a fianchetto here — be honest about that — but the tools are the same ones you use when the king is behind g2: fix the center, bring pieces over, pry the h-file, and count attackers. When you have the other side of this (you’re attacking his Bg2), you add the bishop trade (...Qd7 and ...Bh3) to the same recipe.",
+      "notes": [
+        {
+          "after": 16,
+          "ply": 16,
+          "text": "8.e5 closes the center. This is the green light for a wing attack."
+        },
+        {
+          "after": 21,
+          "ply": 21,
+          "text": "11.h4. The lever starts only after the center is fixed and the knight is heading to the kingside (Nf1–e3–g5)."
+        },
+        {
+          "after": 31,
+          "ply": 31,
+          "text": "16.Bh3 — the same square you use (in reverse) to trade a fianchetto bishop. Here it also eyes e6 and the kingside."
+        },
+        {
+          "after": 53,
+          "ply": 53,
+          "text": "27.h5 opens the h-file. The rook can swing to h4. The attacker–defender count is now decisive."
+        },
+        {
+          "after": 61,
+          "ply": 61,
+          "text": "31.Qxh7+ ends it. The attack worked because the center never reopened."
+        }
+      ]
+    },
+    {
+      "id": "kasparov-topalov-1999",
+      "white": "Garry Kasparov",
+      "black": "Veselin Topalov",
+      "event": "Hoogovens / Wijk aan Zee",
+      "site": "Wijk aan Zee, Netherlands",
+      "date": "1999.01.20",
+      "round": "4",
+      "result": "1-0",
+      "eco": "B07",
+      "source": "Public PGN of Kasparov–Topalov, Wijk aan Zee 1999, verified from the Wikipedia game record of ‘Kasparov’s Immortal.’",
+      "url": "https://en.wikipedia.org/wiki/Kasparov%27s_Immortal",
+      "sans": [
+        "e4",
+        "d6",
+        "d4",
+        "Nf6",
+        "Nc3",
+        "g6",
+        "Be3",
+        "Bg7",
+        "Qd2",
+        "c6",
+        "f3",
+        "b5",
+        "Nge2",
+        "Nbd7",
+        "Bh6",
+        "Bxh6",
+        "Qxh6",
+        "Bb7",
+        "a3",
+        "e5",
+        "O-O-O",
+        "Qe7",
+        "Kb1",
+        "a6",
+        "Nc1",
+        "O-O-O",
+        "Nb3",
+        "exd4",
+        "Rxd4",
+        "c5",
+        "Rd1",
+        "Nb6",
+        "g3",
+        "Kb8",
+        "Na5",
+        "Ba8",
+        "Bh3",
+        "d5",
+        "Qf4+",
+        "Ka7",
+        "Rhe1",
+        "d4",
+        "Nd5",
+        "Nbxd5",
+        "exd5",
+        "Qd6",
+        "Rxd4",
+        "cxd4",
+        "Re7+",
+        "Kb6",
+        "Qxd4+",
+        "Kxa5",
+        "b4+",
+        "Ka4",
+        "Qc3",
+        "Qxd5",
+        "Ra7",
+        "Bb7",
+        "Rxb7",
+        "Qc4",
+        "Qxf6",
+        "Kxa3",
+        "Qxa6+",
+        "Kxb4",
+        "c3+",
+        "Kxc3",
+        "Qa1+",
+        "Kd2",
+        "Qb2+",
+        "Kd1",
+        "Bf1",
+        "Rd2",
+        "Rd7",
+        "Rxd7",
+        "Bxc4",
+        "bxc4",
+        "Qxh8",
+        "Rd3",
+        "Qa8",
+        "c3",
+        "Qa4+",
+        "Ke1",
+        "f4",
+        "f5",
+        "Kc1",
+        "Rd2",
+        "Qa7"
+      ],
+      "part": "attack-theirs",
+      "teaches": [
+        "trade-bishop",
+        "count"
+      ],
+      "summary": "The model for trading the fianchetto bishop with Qd2 and Bh6 — the 150 Attack vs a Pirc. Kasparov plays 4.Be3, 5.Qd2 and 8.Bh6, and Topalov gives up the g7 bishop. The rest of the game is a famous attack (including 24.Rxd4), but the opening lesson for you is the setup: queen and bishop cooperate to remove the defender on g7. When you are Black against a bishop on g2, you use the same idea in reverse: ...Qd7 and ...Bh3.",
+      "notes": [
+        {
+          "after": 9,
+          "ply": 9,
+          "text": "5.Qd2 gets ready for Bh6. The queen and bishop battery is the trademark of this plan."
+        },
+        {
+          "after": 15,
+          "ply": 15,
+          "text": "8.Bh6 offers the trade. After 8...Bxh6 9.Qxh6 the dark squares around Black’s king are weaker, even though Black later castled the other way."
+        }
+      ]
+    },
+    {
+      "id": "greenfeld-anand-1994",
+      "white": "Alon Greenfeld",
+      "black": "Viswanathan Anand",
+      "event": "European Club Cup",
+      "site": "Lyon, France",
+      "date": "1994",
+      "round": "final",
+      "result": "0-1",
+      "eco": "B08",
+      "source": "Public master-game record of Greenfeld–Anand, European Club Cup, Lyon 1994 (Classical Pirc).",
+      "url": "https://chessopeningmodelgames.com/openings/pirc-defence/classical-system-4-nf3-bg7-5-be2/",
+      "sans": [
+        "Nf3",
+        "g6",
+        "d4",
+        "Bg7",
+        "e4",
+        "d6",
+        "Be2",
+        "Nf6",
+        "Nc3",
+        "O-O",
+        "O-O",
+        "Nc6",
+        "Be3",
+        "Bg4",
+        "Qd2",
+        "e5",
+        "d5",
+        "Ne7",
+        "Rad1",
+        "Bd7",
+        "Ne1",
+        "Ng4",
+        "Bxg4",
+        "Bxg4",
+        "f3",
+        "Bd7",
+        "f4",
+        "Bg4",
+        "Rb1",
+        "exf4",
+        "Rxf4",
+        "Bd7",
+        "Bd4",
+        "Bxd4+",
+        "Qxd4",
+        "f5",
+        "Rf2",
+        "fxe4",
+        "Rxf8+",
+        "Qxf8",
+        "Nxe4",
+        "Qg7",
+        "Rd1",
+        "Qxd4+",
+        "Rxd4",
+        "Kg7",
+        "Nc3",
+        "b5",
+        "Re4",
+        "Ng8",
+        "a4",
+        "Nf6",
+        "Rd4",
+        "bxa4",
+        "Nd3",
+        "Rb8",
+        "h3",
+        "h5",
+        "Rc4",
+        "Rb7",
+        "Kf2",
+        "a5",
+        "Ke2",
+        "g5",
+        "h4",
+        "Bg4+",
+        "Ke3",
+        "gxh4",
+        "Rxa4",
+        "Bf5",
+        "Rxa5",
+        "Ng4+",
+        "Kd4",
+        "Bxd3",
+        "Kxd3",
+        "Ne5+",
+        "Ke4",
+        "Rxb2",
+        "Kf5",
+        "Rxc2",
+        "Ne4",
+        "Rxg2",
+        "Ra7",
+        "Nf7",
+        "Rxc7",
+        "h3",
+        "Rc1",
+        "h2",
+        "Rh1",
+        "Nh6+"
+      ],
+      "part": "own-fianchetto",
+      "teaches": [
+        "use-g7",
+        "break-e5"
+      ],
+      "summary": "A model of using the g7 bishop in a Classical Pirc. Anand plays ...g6, ...Bg7, ...O-O, then ...Nc6, ...Bg4 and ...e5. When the center closes with d5, he later breaks with ...f5, trades the dark-squared bishops, and wins the ending. The lesson: the setup is only the start. The attack comes from the central break and the bishop’s diagonal, not from waiting.",
+      "notes": [
+        {
+          "after": 16,
+          "ply": 16,
+          "text": "8...e5, the classical Pirc break, after the bishop is already on g7 and the king is safe."
+        },
+        {
+          "after": 36,
+          "ply": 36,
+          "text": "18...f5. Once the center is fixed, the next break opens lines for the pieces."
+        }
+      ]
+    },
+    {
+      "id": "blake-win-g3-895428667",
+      "white": "",
+      "black": "",
+      "event": "Chess.com daily",
+      "site": "Chess.com",
+      "date": "",
+      "result": "0-1",
+      "eco": "",
+      "source": "A model win, Chess.com daily game 895428667. Verified from your public game archive.",
+      "url": "https://www.chess.com/game/daily/895428667",
+      "sans": [
+        "g3",
+        "Nf6",
+        "Bg2",
+        "e5",
+        "e4",
+        "Nc6",
+        "c3",
+        "d5",
+        "Qe2",
+        "Qe7",
+        "d3",
+        "d4",
+        "h3",
+        "Be6",
+        "Qd2",
+        "O-O-O",
+        "Ne2",
+        "Ng4",
+        "hxg4",
+        "Bxg4",
+        "f3",
+        "Bd7",
+        "Qg5",
+        "f6",
+        "Qh4",
+        "g5",
+        "Qh2",
+        "Kb8",
+        "cxd4",
+        "Qb4+",
+        "Kf2",
+        "Nxd4",
+        "Nxd4",
+        "Bc5",
+        "a3",
+        "Qxd4+",
+        "Ke1",
+        "Qf2+",
+        "Kd1",
+        "Ba4+"
+      ],
+      "part": "attack-theirs",
+      "teaches": [
+        "center-first"
+      ],
+      "summary": "One of your wins against his 1.g3. You occupied the center with ...e5 and ...d5, developed, and castled queenside instead of throwing the h-pawn first. That’s the right order: center, pieces, then attack. Accuracy 73.8. Replay it and notice how different it feels from the games that started 1.g3 h5.",
+      "notes": []
+    },
+    {
+      "id": "blake-hfile-164647551662",
+      "white": "",
+      "black": "",
+      "event": "Chess.com live 15+10",
+      "site": "Chess.com",
+      "date": "2026.02.13",
+      "round": "-",
+      "result": "1-0",
+      "eco": "B01",
+      "source": "A public Chess.com game, 13 February 2026 (America/Denver). Verified from the archive PGN and checked with Stockfish 19 (depth 16).",
+      "url": "https://www.chess.com/game/live/164647551662",
+      "sans": [
+        "e4",
+        "d5",
+        "exd5",
+        "Qxd5",
+        "Nc3",
+        "Qd8",
+        "Nf3",
+        "c6",
+        "Bc4",
+        "e6",
+        "d3",
+        "a5",
+        "a4",
+        "g6",
+        "Be3",
+        "Bg7",
+        "h4",
+        "Nf6",
+        "Qd2",
+        "O-O",
+        "Bh6",
+        "Nh5",
+        "g4",
+        "Bxh6",
+        "Qxh6",
+        "Ng7",
+        "h5",
+        "gxh5",
+        "Rxh5",
+        "Nxh5",
+        "gxh5",
+        "Qf6",
+        "Qxf6",
+        "Nd7",
+        "Qh6",
+        "Nb6",
+        "O-O-O",
+        "Bd7",
+        "Rg1+"
+      ],
+      "part": "attack-theirs",
+      "teaches": [
+        "h-checklist",
+        "trade-bishop",
+        "h-lever",
+        "count"
+      ],
+      "summary": "Your model for how the h-file attack is supposed to go. Black fianchettoed with ...g6 and ...Bg7. You played Qd2 and 11.Bh6 (Stockfish is fine with Bh6 — about +1.2, a small step behind 11.h5 or 11.Bg5, not a mistake) and traded the defender. The queen recaptured on h6, then 14.h5 opened the file (still winning; Ng5 was even stronger). The rook came to h5, the queen returned to h6, and you castled queenside — the other side — before 20.Rg1+. He resigned facing mate. Two honest footnotes from the engine: 15.Rxh5 was not the most precise (15.Ng5 was stronger, though you were still winning), and 19.O-O-O missed a forced mate starting with 19.Ng5 or 19.Qg5+, but putting the king on the other side is the right idea. Compare the order here with the games where the h-pawn went alone.",
+      "notes": [
+        {
+          "after": 16,
+          "ply": 16,
+          "text": "8...Bg7. The fianchetto is on the board. This is the bishop you want to trade."
+        },
+        {
+          "after": 17,
+          "ply": 17,
+          "text": "9.h4. The first h-pawn move. The engine is actually fine with it here (about the same as 9.Qd2). The important part is what you do next: you don’t keep pushing the pawn alone."
+        },
+        {
+          "after": 19,
+          "ply": 19,
+          "text": "10.Qd2. The queen supports Bh6. This is checklist item 3 — get ready to trade the g7 bishop."
+        },
+        {
+          "after": 21,
+          "ply": 21,
+          "text": "11.Bh6. You offer the trade. Stockfish rates this as a normal attacking move, not a mistake. If he takes, the queen recaptures and the dark squares around his king are soft."
+        },
+        {
+          "after": 25,
+          "ply": 25,
+          "text": "13.Qxh6. The queen is already on the h-file. The rook is behind the h-pawn. Now the second push has backup."
+        },
+        {
+          "after": 27,
+          "ply": 27,
+          "text": "14.h5. The second push, with the queen on h6 and the rook on h1 ready. The engine prefers 14.Ng5 (even more crushing), but 14.h5 is still winning and is the thematic lever."
+        },
+        {
+          "after": 29,
+          "ply": 29,
+          "text": "15.Rxh5. The rook enters the file. Honest note: 15.Ng5 was stronger (about a piece’s worth more precise). The idea — rook onto the open h-file — is still the right one, and the position stays winning."
+        },
+        {
+          "after": 35,
+          "ply": 35,
+          "text": "18.Qh6. The queen returns to the h-file. 18.Qg5+ was a faster win; Qh6 keeps the attack on the file and is still completely winning."
+        },
+        {
+          "after": 37,
+          "ply": 37,
+          "text": "19.O-O-O. King to the other side — checklist item 2. The engine has a forced mate with 19.Ng5 or 19.Qg5+ here, so this isn’t the most precise move, but the plan of getting the king off the e-file is exactly what the other games were missing."
+        },
+        {
+          "after": 39,
+          "ply": 39,
+          "text": "20.Rg1+. Mate is on the board (21.Qg7#). He resigned. This is the attack working because the bishop was traded, the queen and rook used the h-file, and the king left the center."
+        }
+      ]
+    }
+  ],
+  "drills": [
+    {
+      "id": "g3-not-h5",
+      "part": "attack-theirs",
+      "theme": "center-first",
+      "fromGame": {
+        "url": "https://www.chess.com/game/live/164647762202",
+        "white": "",
+        "black": "",
+        "result": "1-0",
+        "note": "You played 1...h5 in this rapid game. The attack never landed; the center was the real fight."
+      },
+      "fen": "rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPP1P/RNBQKBNR b KQkq - 0 1",
+      "side": "black",
+      "lastMove": {
+        "san": "g3",
+        "from": "g2",
+        "to": "g3"
+      },
+      "prompt": "White has just played 1.g3, heading for Bg2. What’s the plan, and what’s your first move?",
+      "planChoices": [
+        {
+          "id": "center",
+          "text": "Occupy the center first (...e5, ...d5, or ...Nf6 / ...c5). Attack the king later.",
+          "correct": true
+        },
+        {
+          "id": "h5",
+          "text": "Start the attack immediately with ...h5-h4, before he can castle.",
+          "correct": false,
+          "why": "The h-pawn lever is real, but not yet. The center is wide open and your pieces are on their starting squares. 1...h5 is the move you played in this game; he got a free hand in the middle."
+        },
+        {
+          "id": "copy",
+          "text": "Copy him with ...g6 and wait to see where he puts the king.",
+          "correct": false,
+          "why": "A fianchetto of your own is fine (it’s the Pirc/Modern setup), but you still need a central plan. Waiting isn’t the plan."
+        }
+      ],
+      "acceptedMoves": [
+        "e5",
+        "d5",
+        "Nf6",
+        "c5",
+        "e6",
+        "d6",
+        "c6",
+        "g6"
+      ],
+      "preferredMoves": [
+        "e5",
+        "d5",
+        "Nf6"
+      ],
+      "wrongHighlight": [
+        "h5"
+      ],
+      "hePlayed": "h5",
+      "feedbackGood": "Yes. Against 1.g3, take a share of the center. ...e5, ...d5, or ...Nf6 are all honest. Once you’ve developed and the center is stable, then ...Qd7, ...Bh3, and the h-pawn become the attack.",
+      "feedbackBad": "In this game you played 1...h5. The idea (pry open the h-file) is the right tool in the wrong moment. Play in the center first — ...e5, ...d5, or ...Nf6 — and save the h-pawn for after the center is fixed.",
+      "smirnov": "attack-center"
+    },
+    {
+      "id": "h5-hangs-rook",
+      "part": "attack-theirs",
+      "theme": "stop-and-center",
+      "fromGame": {
+        "url": "https://www.chess.com/game/live/166435433174",
+        "white": "",
+        "black": "",
+        "result": "1-0",
+        "note": "After 7.Bg2 you played 7...h5, and 8.Bxa8 won the rook on the long diagonal."
+      },
+      "fen": "r1bqk2r/p1pnbppp/1p1p1n2/PP2p3/8/6P1/1BPPPPBP/RN1QK1NR b KQkq - 2 7",
+      "side": "black",
+      "lastMove": {
+        "san": "Bg2",
+        "from": "f1",
+        "to": "g2"
+      },
+      "prompt": "He just played Bg2. Before you pick an attacking move, what does that last move threaten? Then choose a move.",
+      "askThreats": true,
+      "threats": [
+        {
+          "text": "The bishop on g2 is now on the long diagonal, looking at the undefended rook on a8.",
+          "key": true
+        },
+        {
+          "text": "If the diagonal stays open, ...h5 (or moving the d7-knight away carelessly) can leave a8 hanging."
+        }
+      ],
+      "planChoices": [
+        {
+          "id": "tuck",
+          "text": "The long diagonal is the problem. Tuck the rook or close/occupy the center (...Rb8, ...e4, or ...d5).",
+          "correct": true
+        },
+        {
+          "id": "h5",
+          "text": "Ignore the bishop and start the attack with ...h5.",
+          "correct": false,
+          "why": "That’s what you played. 8.Bxa8 won the exchange immediately. The wing attack has to wait until a8 is safe."
+        }
+      ],
+      "acceptedMoves": [
+        "Rb8",
+        "e4",
+        "d5"
+      ],
+      "preferredMoves": [
+        "e4",
+        "Rb8",
+        "d5"
+      ],
+      "wrongHighlight": [
+        "h5"
+      ],
+      "hePlayed": "h5",
+      "feedbackGood": "Exactly. Bg2 wasn’t just a developing move — it hit a8. ...e4, ...Rb8, or ...d5 deal with that. After the rook is safe, you can still look at a later h-pawn attack.",
+      "feedbackBad": "You played 7...h5, and 8.Bxa8 took the rook. His last move, Bg2, put the bishop on the long diagonal against an undefended rook. The rule: check the long diagonal before you start the h-pawn. ...e4, ...Rb8, or ...d5 were the moves.",
+      "smirnov": "dont-grab",
+      "engineBest": "e4"
+    },
+    {
+      "id": "h3-then-center",
+      "part": "attack-theirs",
+      "theme": "stop-and-center",
+      "fromGame": {
+        "url": "https://www.chess.com/game/live/164647762202",
+        "white": "",
+        "black": "",
+        "result": "1-0",
+        "note": "After an early ...h5-h4-h3, he dropped the bishop to f1. The engine wanted ...d5, not more pieces on the wing."
+      },
+      "fen": "rnbqkb1r/ppp2pp1/3p1n2/4p3/4P3/1P1P1NPp/P1P2P1P/RNBQKB1R b KQkq - 1 7",
+      "side": "black",
+      "lastMove": {
+        "san": "Bf1",
+        "from": "g2",
+        "to": "f1"
+      },
+      "prompt": "Your h-pawn is already on h3 and his bishop just dropped back to f1. What’s the plan now?",
+      "planChoices": [
+        {
+          "id": "d5",
+          "text": "Stop the wing play and break in the center with ...d5.",
+          "correct": true
+        },
+        {
+          "id": "more-wing",
+          "text": "Keep going on the kingside: pin with ...Bg4 and pile up.",
+          "correct": false,
+          "why": "You played ...Bg4. The h-pawn has already done its job (the bishop left g2). The way to cash in is to open the center with ...d5 while his king is still uncastled."
+        }
+      ],
+      "acceptedMoves": [
+        "d5"
+      ],
+      "preferredMoves": [
+        "d5"
+      ],
+      "alsoUseful": [
+        "a5",
+        "Be7"
+      ],
+      "hePlayed": "Bg4",
+      "feedbackGood": "Yes — ...d5. The h-pawn already forced his bishop off g2. Opening the center now, while his king is still on e1, is the Smirnov idea of opening the center vs an uncastled king.",
+      "feedbackBad": "You played ...Bg4. It’s natural, but the engine move is ...d5. The wing has already done its work; now hit the uncastled king through the center.",
+      "smirnov": "open-center",
+      "engineBest": "d5"
+    },
+    {
+      "id": "both-castled-not-auto-bh3",
+      "part": "attack-theirs",
+      "theme": "trade-bishop",
+      "fromGame": {
+        "url": "https://www.chess.com/game/daily/870708471",
+        "white": "",
+        "black": "",
+        "result": "1-0",
+        "note": "Both kings are short. The g2 bishop is the long-term target, but the center is still tense. You played ...Bb7; the engine wanted ...Be7."
+      },
+      "fen": "r1bq1rk1/p2p1ppp/1pnb1n2/2p1p3/2P1P3/2NP2P1/PP2NPBP/R1BQ1RK1 b - - 6 8",
+      "side": "black",
+      "lastMove": {
+        "san": "Nbc3",
+        "from": "b1",
+        "to": "c3"
+      },
+      "prompt": "Both kings have castled short and his bishop is on g2. Is it time for ...Qd7 and ...Bh3, or something else?",
+      "planChoices": [
+        {
+          "id": "improve",
+          "text": "Not yet. The center is still tense. Improve a piece (for example ...Be7) and keep ...Qd7-Bh3 as the later plan.",
+          "correct": true
+        },
+        {
+          "id": "now",
+          "text": "Go after the bishop immediately with ...Qd7 and ...Bh3.",
+          "correct": false,
+          "why": "That’s the right recipe, but not the right moment. The center (pawns on e4/e5 and c4/c5) can still open, and your bishop on d6 can get hit. Get the pieces organized first."
+        },
+        {
+          "id": "bb7",
+          "text": "Fianchetto the other bishop with ...Bb7 and wait.",
+          "correct": false,
+          "why": "That’s what you played. ...Bb7 is slow here and doesn’t help the d6-bishop or the king attack. ...Be7, getting ready to meet Nd5, was the useful move."
+        }
+      ],
+      "acceptedMoves": [
+        "Be7",
+        "Nd4",
+        "Rb8"
+      ],
+      "preferredMoves": [
+        "Be7"
+      ],
+      "hePlayed": "Bb7",
+      "feedbackGood": "Good. The trade with ...Qd7 and ...Bh3 is the long-term plan against g2, but the center isn’t fixed yet. ...Be7 (or ...Nd4 / ...Rb8) improves a piece. Come back to the bishop trade once the position is ready.",
+      "feedbackBad": "You played ...Bb7. The attacking recipe (...Qd7, ...Bh3) is correct for this king position, but not this move. The center is still fluid, so first improve the pieces — ...Be7 is the engine’s idea — and only then hunt the g2 bishop.",
+      "smirnov": "least-active",
+      "engineBest": "Be7"
+    },
+    {
+      "id": "when-h5-is-right",
+      "part": "attack-theirs",
+      "theme": "h-lever",
+      "fromGame": {
+        "url": "https://www.chess.com/game/daily/962129657",
+        "white": "",
+        "black": "",
+        "result": "1-0",
+        "note": "The center is closed (d5/e4 vs ...e5/...d6). You played ...h5, which is a reasonable lever here — unlike 1...h5 in an open position. The loss in this same game came later: after 10.h3 you played 10...Ne3 and hung the knight (see the ‘h3, don’t hang ...Ne3’ drill)."
+      },
+      "fen": "rnbq1rk1/ppp2pbp/3p1np1/3Pp3/4P3/2N3P1/PPP1NPBP/R1BQK2R b KQ - 1 7",
+      "side": "black",
+      "lastMove": {
+        "san": "Nge2",
+        "from": "g1",
+        "to": "e2"
+      },
+      "prompt": "You have a Pirc-style bishop on g7, and his king will castle behind g2. The center is closed. What’s allowed now?",
+      "planChoices": [
+        {
+          "id": "h-or-qs",
+          "text": "The center is closed, so the h-pawn lever (...h5) is now a real attacking idea. ...c6 or ...a5, developing the queenside, are just as good.",
+          "correct": true
+        },
+        {
+          "id": "never-h",
+          "text": "Never play ...h5 against a fianchetto. Only break in the center.",
+          "correct": false,
+          "why": "The rule is ‘h-pawn after the center is fixed,’ not ‘never.’ Here d5 and e4 lock the middle, so ...h5 is thematic. (You played it in this game. The loss came later, not from the idea itself.)"
+        }
+      ],
+      "acceptedMoves": [
+        "h5",
+        "c6",
+        "a5",
+        "Bd7",
+        "Nbd7",
+        "Na6"
+      ],
+      "preferredMoves": [
+        "c6",
+        "a5",
+        "Bd7",
+        "h5"
+      ],
+      "hePlayed": "h5",
+      "feedbackGood": "Yes. Closed center = the h-pawn is allowed. ...h5 is fine here; so are ...c6 and ...a5. Compare this with the first drill, where 1...h5 was premature because the center was empty. A later move in this same game, 10...Ne3, is the one that hung a piece — that’s a separate drill.",
+      "feedbackBad": "In a closed center, ...h5 is a standard lever, not a mistake. ...c6 and ...a5 are equally good if you’d rather develop first. The earlier drill (1...h5) was wrong because the center was wide open — that’s the distinction.",
+      "smirnov": "sac-lines",
+      "engineBest": "c6"
+    },
+    {
+      "id": "pirc-vs-b4-break",
+      "part": "own-fianchetto",
+      "theme": "use-g7",
+      "fromGame": {
+        "url": "https://www.chess.com/game/daily/890550299",
+        "white": "",
+        "black": "",
+        "result": "1-0",
+        "note": "A Pirc/Modern setup against 1.b4 and a later g3/Bg2. After 8.b5, the break and the development of the b8-knight are the plan. This is also the game where you later missed a hanging queen."
+      },
+      "fen": "rn1q1rk1/pbp1ppbp/1p1p1np1/1P6/4P3/3P2PP/PBP2PB1/RN1QK1NR b KQ - 0 8",
+      "side": "black",
+      "lastMove": {
+        "san": "b5",
+        "from": "b4",
+        "to": "b5"
+      },
+      "prompt": "Your bishop is on g7, you’ve castled, and he’s thrown in b5 with bishops on b2 and g2. What’s the plan for the g7 bishop?",
+      "planChoices": [
+        {
+          "id": "develop-break",
+          "text": "Finish development (...Nbd7) or chip at b5 with ...a6, then open the diagonal with ...e5 or ...d5.",
+          "correct": true
+        },
+        {
+          "id": "h5",
+          "text": "Ignore the queenside and start ...h5 against his future king.",
+          "correct": false,
+          "why": "His king is still in the center and the long diagonals are live. Develop and break in the middle first. The h-pawn can wait."
+        }
+      ],
+      "acceptedMoves": [
+        "Nbd7",
+        "a6",
+        "Ne8",
+        "c6"
+      ],
+      "preferredMoves": [
+        "Nbd7",
+        "a6"
+      ],
+      "hePlayed": "a6",
+      "feedbackGood": "Yes. ...Nbd7 or ...a6 (you played ...a6, which is fine) gets the queenside moving. The g7 bishop becomes a monster once ...e5 or ...d5 opens the diagonal. Watch those long diagonals from b2 and g2 the whole time.",
+      "feedbackBad": "The g7 bishop needs a central break, not an early h-pawn here. ...Nbd7 or ...a6 (the move you actually played, which is good) first, then ...e5 or ...d5.",
+      "smirnov": "least-active",
+      "engineBest": "Nbd7"
+    },
+    {
+      "id": "hanging-queen-pirc",
+      "part": "own-fianchetto",
+      "theme": "count",
+      "fromGame": {
+        "url": "https://www.chess.com/game/daily/890550299",
+        "white": "",
+        "black": "",
+        "result": "1-0",
+        "note": "Later in the same game you were winning. His queen sat on f3, hanging to ...Qxf3, and you played ...Ne4 instead. This is the missed-queen game from your earlier review."
+      },
+      "fen": "2r3k1/3n1pbp/1p3np1/3q4/5P2/2BP1Q1P/2P4K/1N3RN1 b - - 2 22",
+      "side": "black",
+      "lastMove": {
+        "san": "Qf3",
+        "to": "f3"
+      },
+      "prompt": "Same game, later on. His last move put the queen on f3. List the threats and pick a move. (This is also a tactics check — attacks still start with ‘can I take something?’)",
+      "askThreats": true,
+      "threats": [
+        {
+          "text": "His queen on f3 is undefended and can be taken by your queen on d5.",
+          "key": true
+        }
+      ],
+      "planChoices": [
+        {
+          "id": "take",
+          "text": "Take the hanging queen, ...Qxf3.",
+          "correct": true
+        },
+        {
+          "id": "fancy",
+          "text": "Jump in with ...Ne4 and go after the king.",
+          "correct": false,
+          "why": "That’s what you played. There was no need. The queen on f3 is hanging, and taking it wins on the spot."
+        }
+      ],
+      "acceptedMoves": [
+        "Qxf3"
+      ],
+      "preferredMoves": [
+        "Qxf3"
+      ],
+      "hePlayed": "Ne4",
+      "feedbackGood": "Take it. ...Qxf3 wins the queen. Even in a ‘fianchetto attack’ game, the first job is still: what did his last move leave hanging?",
+      "feedbackBad": "You played ...Ne4 and left his queen alive. ...Qxf3 wins it. The attacking principles only work if the simple captures are checked first.",
+      "smirnov": "forcing",
+      "engineBest": "Qxf3"
+    },
+    {
+      "id": "h4-better-be3",
+      "part": "attack-theirs",
+      "theme": "h-checklist",
+      "fromGame": {
+        "url": "https://www.chess.com/game/daily/898366349",
+        "white": "",
+        "black": "",
+        "result": "0-1",
+        "note": "Daily game, December 2025. You played 15.h4; Stockfish 19 (depth 16) prefers 15.Be3, a 244-centipawn improvement. The pawn was going alone, your king was still on e1, and his g7 bishop was still on the board."
+      },
+      "fen": "rn1q1rk1/1b2ppbp/pp6/3p1pP1/3P4/2N2N1P/PPP5/R1BQK1R1 w Q - 0 15",
+      "side": "white",
+      "lastMove": {
+        "san": "gxf5",
+        "from": "g6",
+        "to": "f5"
+      },
+      "prompt": "You’ve already thrown the g- and f-pawns. His king is tucked behind a bishop on g7, your king is still on e1, and the queenside bishop hasn’t moved. What’s the plan, and what’s the first move?",
+      "planChoices": [
+        {
+          "id": "develop",
+          "text": "Stop the pawn storm. Develop the dark-squared bishop (Be3) and get the king toward safety. The h-pawn can wait.",
+          "correct": true
+        },
+        {
+          "id": "h4",
+          "text": "Keep going: 15.h4 and 16.h5, and crash through on the h-file.",
+          "correct": false,
+          "why": "That’s what you played. The engine says 15.h4 drops about 2½ pawns versus 15.Be3. The pawn is going alone, your king is on e1, and his g7 bishop is still the key defender."
+        },
+        {
+          "id": "trade-now",
+          "text": "Ignore the king and try Bh6 immediately, even without the queen on d2.",
+          "correct": false,
+          "why": "Bh6 isn’t even possible here — the bishop is still on c1. That’s the point of Be3 (or Qd2 later): develop first, then look at the trade."
+        }
+      ],
+      "acceptedMoves": [
+        "Be3",
+        "Bf4",
+        "Ne2",
+        "Qd3"
+      ],
+      "preferredMoves": [
+        "Be3"
+      ],
+      "engineBest": "Be3",
+      "hePlayed": "h4",
+      "feedbackGood": "Yes. 15.Be3 is the engine move (about even). 15.h4, which you played in the game, is a 244-centipawn error. The checklist is missing several items: king still on e1, bishop on g7 not traded, no queen or rook ready on the h-file. Develop, then attack.",
+      "feedbackBad": "In the game you played 15.h4. Stockfish’s first choice is 15.Be3 (also 15.Bf4 or 15.Ne2 are reasonable). 15.h4 leaves you about 2½ pawns worse. The h-pawn was going alone, your king was on e1, and his g7 bishop was still there. That’s three missing checklist items.",
+      "smirnov": "least-active"
+    },
+    {
+      "id": "e4-uncastled-hstorm",
+      "part": "attack-theirs",
+      "theme": "h-checklist",
+      "fromGame": {
+        "url": "https://www.chess.com/game/daily/903175599",
+        "white": "",
+        "black": "",
+        "result": "0-1",
+        "note": "Daily game, December 2025. 16.h4 itself was fine (only a 21-centipawn drop). The real mistake was 17.e4, opening the center with the king on e1 (331-centipawn drop; 17.exf6 is best). You then pushed 19.h5, still uncastled, another 162-centipawn error (19.O-O was the way back)."
+      },
+      "fen": "r2q1rk1/3bn1bp/p3ppp1/1p1pP3/1P3PPP/P1NBP3/3BQ3/R3K2R w KQ - 0 17",
+      "side": "white",
+      "lastMove": {
+        "san": "f6",
+        "from": "f7",
+        "to": "f6"
+      },
+      "prompt": "You just played 16.h4, and he answered 16...f6, hitting the e5-pawn. Your king is still on e1. What’s the plan?",
+      "planChoices": [
+        {
+          "id": "take-or-safe",
+          "text": "Don’t open the center while the king is on e1. Take on f6, or keep the center closed and get the king safe. The h-pawn can wait.",
+          "correct": true
+        },
+        {
+          "id": "blast",
+          "text": "Open it with 17.e4, then keep pushing h5. A double pawn break will smash through.",
+          "correct": false,
+          "why": "That’s what you played. 17.e4 is a 331-centipawn error — it opens your own king. 17.exf6 is the engine move. You later played 19.h5, still uncastled, which was another mistake."
+        },
+        {
+          "id": "more-h",
+          "text": "Ignore ...f6 and go 17.h5 immediately, whatever happens in the center.",
+          "correct": false,
+          "why": "17.h5 is playable-ish (about half a pawn worse than 17.exf6) but it still leaves the king in the middle. The rule is: if the center can open, deal with that first. In the game the center did open, and the h-storm died."
+        }
+      ],
+      "acceptedMoves": [
+        "exf6",
+        "h5"
+      ],
+      "preferredMoves": [
+        "exf6"
+      ],
+      "engineBest": "exf6",
+      "hePlayed": "e4",
+      "feedbackGood": "Yes. 17.exf6 keeps the center under control. Honest note: 16.h4, a move earlier, was not the mistake (the engine is almost fine with it). The storm failed because 17.e4 opened the middle with your king on e1, and 19.h5 kept going anyway. Checklist items 1 and 2 — center stable, king safe — were missing when you needed them most.",
+      "feedbackBad": "In the game you played 17.e4, a 331-centipawn error. Best is 17.exf6. Opening the center with the king on e1 is the same uncastled-king problem that has been costing you games. You then played 19.h5, still uncastled (another 162-centipawn drop; 19.O-O was better). 16.h4 itself was okay — it was the next two decisions that broke the attack.",
+      "smirnov": "open-center"
+    },
+    {
+      "id": "h5-early-rb1",
+      "part": "attack-theirs",
+      "theme": "h-checklist",
+      "fromGame": {
+        "url": "https://www.chess.com/game/live/164649607846",
+        "white": "",
+        "black": "",
+        "result": "0-1",
+        "note": "Live 15+10, 13 February 2026, the same day as the model win. After 12...Na5, you played 13.h5; Stockfish 19 prefers 13.Rb1 (210 centipawns better). He answered 13...g5 and closed the file."
+      },
+      "fen": "r3k1nr/1p1b1pb1/pq2p1pp/n2pP3/3P3P/P1NBBN2/1P1Q1PP1/R3K2R w KQkq - 5 13",
+      "side": "white",
+      "lastMove": {
+        "san": "Na5",
+        "from": "c6",
+        "to": "a5"
+      },
+      "prompt": "You’ve already played h4. His knight has just landed on a5, and the queen on b6 is looking at b2. Your king is still in the center. Second h-pawn push, or something else?",
+      "planChoices": [
+        {
+          "id": "tuck",
+          "text": "Deal with ...Nb3 and the loose b2-pawn first (Rb1 or Qc2). The second h-pawn push can wait. Your king isn’t safe yet.",
+          "correct": true
+        },
+        {
+          "id": "h5",
+          "text": "Push 13.h5 now and open the file while his king is still on e8.",
+          "correct": false,
+          "why": "That’s what you played. The engine’s first move is 13.Rb1 (also 13.Qc2). 13.h5 drops about two pawns, and he closed the file with 13...g5 — checklist item 5."
+        },
+        {
+          "id": "castle",
+          "text": "Just castle short immediately, even if b2 hangs.",
+          "correct": false,
+          "why": "13.O-O is legal but the engine doesn’t like it (b2 and the queenside get messy). 13.Rb1 first is the clean way to tuck, then you can castle."
+        }
+      ],
+      "acceptedMoves": [
+        "Rb1",
+        "Qc2",
+        "Qe2"
+      ],
+      "preferredMoves": [
+        "Rb1"
+      ],
+      "engineBest": "Rb1",
+      "hePlayed": "h5",
+      "feedbackGood": "Yes. 13.Rb1 is the engine move. The knight on a5 and queen on b6 are the problem to solve first. In the game 13.h5 was a 210-centipawn error, and he closed the file with ...g5. That’s the ‘second push without backup, king still in the middle’ pattern, plus item 5: when he closes the file, you have to switch.",
+      "feedbackBad": "In the game you played 13.h5. Stockfish wants 13.Rb1 (13.Qc2 is a close second). 13.h5 drops about two pawns, and he stopped the file with 13...g5. The second h-pawn push came while b2 was under fire and the king was still on e1. Tuck first (Rb1), then decide if the h-file is still the plan — and if he closes it, switch to the f-pawn or the center.",
+      "smirnov": "dont-grab"
+    },
+    {
+      "id": "h3-ne3-hangs",
+      "part": "attack-theirs",
+      "theme": "h-checklist",
+      "fromGame": {
+        "url": "https://www.chess.com/game/daily/962129657",
+        "white": "",
+        "black": "",
+        "result": "1-0",
+        "note": "Daily game, April 2026 — the same game as the ‘when ...h5 is right’ drill. The earlier ...h5–...h4 was reasonable in a closed center. After he played 10.h3, closing or challenging the file, 10...Ne3 hung the knight. Stockfish 19 wants 10...Nf6 (a 660-centipawn difference)."
+      },
+      "fen": "rnbq1rk1/ppp2pb1/3p2p1/3Pp3/4PPnp/2N3PP/PPP1N1B1/R1BQ1RK1 b - - 0 10",
+      "side": "black",
+      "lastMove": {
+        "san": "h3",
+        "from": "h2",
+        "to": "h3"
+      },
+      "prompt": "The center is closed and your ...h5–...h4 lever was on time. He just played 10.h3, hitting the knight on g4 and challenging the h-file. What’s the plan?",
+      "planChoices": [
+        {
+          "id": "retreat",
+          "text": "He is closing or challenging the file. Retreat the knight (...Nf6) or take in the center (...exf4). Don’t park a hanging piece on e3.",
+          "correct": true
+        },
+        {
+          "id": "ne3",
+          "text": "Jump into e3 anyway — a knight on e3, fork or no fork, rips his position open.",
+          "correct": false,
+          "why": "That’s what you played. 10...Ne3 hangs the knight to Bxe3. The engine’s move is 10...Nf6, about 6½ pawns better. A piece hang is not a lever."
+        },
+        {
+          "id": "more-h",
+          "text": "Take on g3 and keep the h-file open at all costs.",
+          "correct": false,
+          "why": "10...hxg3 is legal and not a disaster, but it is clearly worse than 10...Nf6. Checklist item 5: if he plays h3, don’t force the file — retreat or switch (here ...exf4 is the other engine-approved idea)."
+        }
+      ],
+      "acceptedMoves": [
+        "Nf6",
+        "exf4",
+        "Nh6"
+      ],
+      "preferredMoves": [
+        "Nf6"
+      ],
+      "engineBest": "Nf6",
+      "hePlayed": "Ne3",
+      "askThreats": true,
+      "threats": [
+        {
+          "id": "h3-knight",
+          "text": "h3 attacks the knight on g4.",
+          "correct": true
+        },
+        {
+          "id": "h3-file",
+          "text": "h3 also challenges the h-file and asks you not to keep pushing blindly.",
+          "correct": true
+        },
+        {
+          "id": "h3-mate",
+          "text": "h3 threatens mate on the move.",
+          "correct": false
+        }
+      ],
+      "feedbackGood": "Yes. 10...Nf6 is the engine move. The earlier ...h5 was the right idea (closed center — that’s the other drill from this game). After 10.h3, the file is being challenged, so you switch or retreat. 10...exf4 is the second choice. In the game 10...Ne3 hung the knight to Bxe3, a 660-centipawn blunder.",
+      "feedbackBad": "In the game you played 10...Ne3, and he took it with Bxe3. That’s a 660-centipawn blunder. Best is 10...Nf6 (10...exf4 is next). Your earlier ...h5–...h4 was fine — this game is the contrast: the lever was on time, then he played h3, and the knight had to go back. Checklist item 5, plus a hanging piece.",
+      "smirnov": "dont-grab"
+    }
+  ],
+  "liveCues": [
+    {
+      "id": "diag-hang",
+      "when": "enemy fianchetto bishop on an open long diagonal and one of your major pieces is loose on that diagonal",
+      "text": "Check the long diagonal. His bishop on {bishop} is looking at {target}. Tucking that piece, or closing the diagonal, comes before any attack."
+    },
+    {
+      "id": "trade-ready",
+      "when": "enemy king short-castled behind a fianchetto and you can aim ...Qd7/...Bh3 or Qd2/Bh6",
+      "text": "His bishop on {bishop} is the key defender. Look at {setup} to trade it off before you try to break through."
+    },
+    {
+      "id": "h-too-early",
+      "when": "h-pawn push is tempting but the center is still open or your development is behind",
+      "text": "The h-pawn lever is for after the center is fixed. Right now a central move (...e5, ...d5, or a developing move) is the plan."
+    },
+    {
+      "id": "h-ready",
+      "when": "center is closed and enemy king is behind a fianchetto",
+      "text": "The center is closed, so the h-pawn lever is a real idea now. Count attackers first, and make sure the long diagonal is safe."
+    },
+    {
+      "id": "own-break",
+      "when": "you have a bishop on g7 (or g2) and a central break is available",
+      "text": "Your fianchetto bishop wants an open diagonal. Look at the {brk} break so it can actually attack something."
+    },
+    {
+      "id": "count",
+      "when": "you have several pieces pointed at his king",
+      "text": "Count attackers versus defenders around his king before you smash through. If you’re not ahead in the count, bring one more piece up."
+    },
+    {
+      "id": "h-checklist",
+      "when": "you are about to push the h-pawn, or you just did, against a fianchetto",
+      "text": "Before that h-pawn move, run the checklist. Missing: {missing}."
+    },
+    {
+      "id": "h-just-pushed",
+      "when": "you just played h4, h5, ...h5, or ...h4",
+      "text": "You pushed the h-pawn. {result}"
+    },
+    {
+      "id": "h-closed",
+      "when": "he has closed or challenged the h-file with h3, g4, ...h6, or ...g5",
+      "text": "He is closing the h-file. Don’t keep pushing it. Switch to the f-pawn lever or break in the center."
+    }
+  ],
+  "hFileChecklist": [
+    {
+      "id": "center",
+      "n": 1,
+      "name": "Center locked or stable",
+      "rule": "The center is closed or firmly held. If he can blow it open with ...d5 / ...e5 / c4 / e4, the wing attack will fall apart.",
+      "smirnov": "attack-center"
+    },
+    {
+      "id": "king",
+      "n": 2,
+      "name": "Your king is safe, ideally on the other side",
+      "rule": "Castle first — queenside if you’re attacking his kingside — so he can’t counterattack your uncastled king while the h-file opens.",
+      "smirnov": "open-center"
+    },
+    {
+      "id": "trade",
+      "n": 3,
+      "name": "Trade the fianchetto bishop first",
+      "rule": "Qd2 and Bh6 as White, or ...Qd7 and ...Bh3 as Black, before or alongside the h-pawn. That bishop guards h3 and f3.",
+      "smirnov": "remove-defender"
+    },
+    {
+      "id": "backup",
+      "n": 4,
+      "name": "Queen, rook, and one more piece ready before the second push",
+      "rule": "The h-pawn only opens the file. You need the queen, a rook on the h-file, and one more piece (a knight to g5/g4, or the bishop that made the trade) before you push the pawn a second time.",
+      "smirnov": "outnumber"
+    },
+    {
+      "id": "closed",
+      "n": 5,
+      "name": "If he closes the file, switch",
+      "rule": "If he plays h3, g4, ...h6, or ...g5 and keeps the file closed, stop the h-pawn and switch to the f-pawn lever (...f5 / f4) or break in the center.",
+      "smirnov": "dont-grab"
+    },
+    {
+      "id": "diag",
+      "n": 6,
+      "name": "Check hanging pieces on the long diagonal",
+      "rule": "Look at a8 and a1 (and the queen) before you push. His bishop on g2 or b2 can take a rook the moment the diagonal opens.",
+      "smirnov": "dont-grab"
+    }
+  ]
+}

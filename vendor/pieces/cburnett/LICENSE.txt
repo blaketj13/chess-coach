@@ -1,0 +1,5 @@
+Cburnett chess pieces
+Author: Colin M.L. Burnett (https://en.wikipedia.org/wiki/User:Cburnett)
+Source: Lichess (https://github.com/lichess-org/lila) public/piece/cburnett
+License: Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
+https://creativecommons.org/licenses/by-sa/3.0/

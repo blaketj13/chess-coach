@@ -1,0 +1,18 @@
+Stockfish.js 19
+Copyright (c) 2026, Chess.com, LLC
+https://github.com/nmrugg/stockfish.js
+License: GNU General Public License version 3 (GPLv3)
+
+Based on Stockfish
+Copyright (c) T. Romstad, M. Costalba, J. Kiiski, G. Linscott and other contributors.
+https://github.com/official-stockfish/Stockfish
+License: GNU General Public License version 3 (GPLv3)
+
+Neural nets by Chris Bao (sscg13)
+https://tests.stockfishchess.org/nns?network_name=nn-61e7af4bb97d
+
+The full GPLv3 text is in licenses/STOCKFISH-GPLv3.txt (and licenses/GPLv3.txt).
+Source for the official engine: https://github.com/official-stockfish/Stockfish
+Source for this wasm/js port: https://github.com/nmrugg/stockfish.js
+
+This app ships engine/stockfish/stockfish-19-lite-single.js and engine/stockfish/stockfish-19-lite-single.wasm.

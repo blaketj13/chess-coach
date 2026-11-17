@@ -1,0 +1,268 @@
+{
+  "version": 1,
+  "title": "Pirc and Modern attacking plans",
+  "intro": "The Pirc and Modern setups are easy to learn and hard to play well. After …g6, …Bg7 and usually …O-O, the plan depends on what White does. Your key piece is the bishop on g7: open its long diagonal with a pawn trade (…e5 or …c5), and don’t sit passively behind a closed wall. Against 1.b4 and 1.g3, this same setup is your repertoire answer — Rousseau and the Caro-Kann only work against 1.e4.",
+  "credit": "Attacking ideas are inspired by GM Igor Smirnov’s public teaching (Remote Chess Academy). This app is not affiliated with or endorsed by him or RCA. Lines were checked with Stockfish 19.",
+  "systems": [
+    {
+      "id": "austrian",
+      "name": "Austrian Attack (4.f4)",
+      "whiteDoes": "White builds a big center with f4 and usually Nf3, aiming at a kingside attack.",
+      "plan": "Castle, then hit the big center. …c5 is the Dragon-style break that opens the long diagonal at once; …Nc6 and …e5 is the other break. If he pushes e5, retreat …Nfd7 and hit the wedge with …c5.",
+      "breaks": [
+        "…c5 (Dragon-style)",
+        "…e5 (after …Nc6)",
+        "If 6.e5: …Nfd7 and …c5"
+      ],
+      "rule": "Don’t sit behind …d6. The g7 bishop wants a pawn trade in the center.",
+      "fen": "rnbq1rk1/ppp1ppbp/3p1np1/8/3PPP2/2NB1N2/PPP3PP/R1BQK2R b KQ - 4 6",
+      "side": "black",
+      "firstMoves": [
+        "c5",
+        "Nc6"
+      ],
+      "note": "After 1.e4 d6 2.d4 Nf6 3.Nc3 g6 4.f4 Bg7 5.Nf3 O-O 6.Bd3, both …c5 and …Nc6 are the right kind of move."
+    },
+    {
+      "id": "150",
+      "name": "The 150 Attack (Be3 and Qd2)",
+      "whiteDoes": "White aims for Qd2, often Bh6, and long castling — the same recipe you use against a fianchetto, aimed at you.",
+      "plan": "If he goes queenside, throw the a- and b-pawns and use the g7 bishop against his king. You can delay …O-O and play …c6 and …b5 first, so Bh6 doesn’t land with tempo. If you do castle short, be ready for his h-pawn — that’s the h-file checklist, from the other side.",
+      "breaks": [
+        "…c6 and …b5 (delay castling)",
+        "…Qa5 and …Nbd7",
+        "…c5 later to open the diagonal"
+      ],
+      "rule": "Opposite-side race: your a- and b-pawns, plus the g7 bishop. Count attackers, and don’t forget his h-pawn coming the other way.",
+      "fen": "rnbqk2r/p3ppbp/2pp1np1/1p6/3PP3/2N1BP2/PPPQ2PP/2KR1BNR b kq - 1 7",
+      "side": "black",
+      "firstMoves": [
+        "Qa5",
+        "Nbd7",
+        "a5"
+      ],
+      "note": "After 4.Be3 Bg7 5.Qd2 c6 6.f3 b5 7.O-O-O, start the queenside attack — …Qa5 or …Nbd7 — before he gets settled."
+    },
+    {
+      "id": "classical",
+      "name": "The Classical (Nf3 and Be2)",
+      "whiteDoes": "White develops quietly and usually castles short. Sometimes he plays h3 to stop …Bg4.",
+      "plan": "Play …e5 or …c5, then …Nc6 and …Re8. …Bg4 is a useful pin if he hasn’t played h3. Once the center is fixed, attack on the side your pawns point. Same-side castling: don’t throw the h-pawn as a first idea.",
+      "breaks": [
+        "…e5 (main)",
+        "…c6 then …e5 or …Qa5",
+        "…Bg4 when he hasn’t played h3"
+      ],
+      "rule": "Same-side: use the center first, then the side your pawns point to. The h-pawn storm is not the first plan here.",
+      "fen": "r2q1rk1/ppp1ppbp/2np1np1/8/3PP1b1/2N1BN2/PPPQBPPP/R4RK1 b - - 9 8",
+      "side": "black",
+      "firstMoves": [
+        "e5",
+        "Bxf3",
+        "Nd7"
+      ],
+      "note": "After 6.O-O Bg4 7.Be3 Nc6 8.Qd2, …e5 is the central break the g7 bishop wants."
+    },
+    {
+      "id": "fianchetto",
+      "name": "White fianchettoes (4.g3)",
+      "whiteDoes": "White plays his own kingside fianchetto, often with Nge2 so the bishop stays on the long diagonal.",
+      "plan": "Take a share of the center with …e5 or …c5, then …Nc6 and …Re8. This is also the structure you see when White opens 1.g3. Don’t throw an early …h5 just because he played g3 — lock or settle the center first, then use the h-file checklist.",
+      "breaks": [
+        "…e5 (main)",
+        "…c5 (opens the diagonal)",
+        "…h5 only after the center is fixed"
+      ],
+      "rule": "Center first, then the checklist. An early …h5 against a fianchetto is the same mistake as in your own games.",
+      "fen": "rnbq1rk1/ppp1ppbp/3p1np1/8/3PP3/2N3P1/PPP1NPBP/R1BQK2R b KQ - 4 6",
+      "side": "black",
+      "firstMoves": [
+        "e5",
+        "c5",
+        "Nc6"
+      ],
+      "note": "After 4.g3 Bg7 5.Bg2 O-O 6.Nge2, …e5 or …c5 — not an early …h5."
+    },
+    {
+      "id": "byrne",
+      "name": "The Byrne (4.Bg5)",
+      "whiteDoes": "White pins the knight, often with Qd2 and the option of long castling.",
+      "plan": "…Bg7, …O-O or …h6, then …c6 or …Nbd7 and the usual breaks. If he goes long, you’re in the same opposite-side race as the 150 Attack: a- and b-pawns, and the g7 bishop.",
+      "breaks": [
+        "…h6, then …O-O",
+        "…c6 and …b5 if he goes long",
+        "…e5 or …c5 once developed"
+      ],
+      "rule": "Same as the 150 if he castles long. If he stays short, break in the center.",
+      "fen": "rnbqk2r/pp2ppbp/2pp1np1/6B1/3PP3/2N5/PPPQ1PPP/2KR1BNR b kq - 1 6",
+      "side": "black",
+      "firstMoves": [
+        "b5",
+        "Nbd7",
+        "Qa5"
+      ],
+      "note": "After 4.Bg5 Bg7 5.Qd2 c6 6.O-O-O, start the queenside pawns or develop with …Nbd7 / …Qa5."
+    },
+    {
+      "id": "non-e4",
+      "name": "Vs 1.d4, 1.c4, 1.b4 and 1.g3",
+      "whiteDoes": "Anything that isn’t 1.e4. Rousseau and the Caro-Kann don’t apply. This is why the Pirc/Modern is your repertoire answer to 1.b4 and 1.g3.",
+      "plan": "The same g7 bishop, then a central break with …e5 or …c5. Against 1.b4, watch the long diagonal of his Bb2 — especially the rook on a8. Against 1.g3, take a share of the center before any h-pawn ideas. The Fianchetto module is how you attack after the setup.",
+      "breaks": [
+        "…e5 or …c5",
+        "vs 1.b4: develop and watch a8",
+        "vs 1.g3: center first, then the checklist"
+      ],
+      "rule": "Same setup, same bishop, same breaks. Don’t try to force a Rousseau or a Caro against 1.b4 or 1.g3.",
+      "fen": "rnbqk1nr/ppppppbp/6p1/8/1P6/8/PBPPPPPP/RN1QKBNR b KQkq - 2 2",
+      "side": "black",
+      "firstMoves": [
+        "d6",
+        "Nf6",
+        "e5",
+        "c5"
+      ],
+      "note": "After 1.b4 g6 2.Bb2 Bg7, develop with …d6 or …Nf6, and don’t leave a8 hanging on the long diagonal."
+    }
+  ],
+  "drills": [
+    {
+      "id": "austrian-c5",
+      "system": "austrian",
+      "fen": "rnbq1rk1/ppp1ppbp/3p1np1/8/3PPP2/2NB1N2/PPP3PP/R1BQK2R b KQ - 4 6",
+      "side": "black",
+      "prompt": "White has played the Austrian (f4, Nf3, Bd3) and hasn’t castled yet. The setup is done. What’s the attacking plan, and what’s a good first move?",
+      "plans": [
+        {
+          "id": "c5",
+          "label": "Hit d4 with …c5 (Dragon-style) and open the long diagonal."
+        },
+        {
+          "id": "nc6",
+          "label": "Develop …Nc6 and get ready for …e5."
+        },
+        {
+          "id": "h5",
+          "label": "Start an h-pawn storm at once with …h5."
+        },
+        {
+          "id": "wait",
+          "label": "Play a quiet move like …a6 and wait for him to show more."
+        }
+      ],
+      "correctPlans": [
+        "c5",
+        "nc6"
+      ],
+      "goodMoves": [
+        "c5",
+        "Nc6"
+      ],
+      "feedbackGood": "That’s the plan. …c5 or …Nc6 (heading for …e5) both hit the big center and wake up the g7 bishop. An early …h5 is the wrong reflex while the center is still fluid.",
+      "feedbackBad": "The g7 bishop wants a pawn trade in the center. …c5 (Dragon-style) or …Nc6 and …e5 are the breaks. Don’t start an h-pawn storm with the center still open, and don’t sit still behind …d6."
+    },
+    {
+      "id": "150-b5",
+      "system": "150",
+      "fen": "rnbqk2r/p3ppbp/2pp1np1/1p6/3PP3/2N1BP2/PPPQ2PP/2KR1BNR b kq - 1 7",
+      "side": "black",
+      "prompt": "He has just castled queenside in the 150 Attack. You delayed …O-O and already have …c6 and …b5. What’s the plan?",
+      "plans": [
+        {
+          "id": "qa5",
+          "label": "Go after his king: …Qa5, …Nbd7, and keep the a- and b-pawns moving."
+        },
+        {
+          "id": "castle",
+          "label": "Castle short right now so your king is safe, then think about an attack later."
+        },
+        {
+          "id": "h5",
+          "label": "Push …h5 and start a kingside storm of your own."
+        },
+        {
+          "id": "e5",
+          "label": "Ignore his king and break with …e5 immediately."
+        }
+      ],
+      "correctPlans": [
+        "qa5"
+      ],
+      "goodMoves": [
+        "Qa5",
+        "Nbd7",
+        "a5"
+      ],
+      "feedbackGood": "Opposite-side race. Your a- and b-pawns, plus the g7 bishop, are the attack. …Qa5 or …Nbd7 keeps it moving. Castling short now hands him a target for Bh6 and the h-pawn.",
+      "feedbackBad": "He just went long. This is a race on the queenside: …Qa5, …Nbd7, and the a- and b-pawns, with the g7 bishop behind them. Castling short now gives his Bh6 and h-pawn a fixed target."
+    },
+    {
+      "id": "classical-e5",
+      "system": "classical",
+      "fen": "r2q1rk1/ppp1ppbp/2np1np1/8/3PP1b1/2N1BN2/PPPQBPPP/R4RK1 b - - 9 8",
+      "side": "black",
+      "prompt": "Classical Pirc, both sides already short. Your bishop is on g4 and the knight is on c6. What’s the plan?",
+      "plans": [
+        {
+          "id": "e5",
+          "label": "Break with …e5 and use the center (and the g7 bishop)."
+        },
+        {
+          "id": "h5",
+          "label": "Throw the h-pawn — same-side attacks start with the rook pawn."
+        },
+        {
+          "id": "b5",
+          "label": "Start a queenside pawn storm as if he had castled long."
+        },
+        {
+          "id": "trade",
+          "label": "Only trade on f3 and then wait."
+        }
+      ],
+      "correctPlans": [
+        "e5"
+      ],
+      "goodMoves": [
+        "e5"
+      ],
+      "feedbackGood": "Same-side castling: use the center. …e5 is the break the g7 bishop wants. The h-pawn storm is not the first idea here.",
+      "feedbackBad": "Both kings are short. Don’t throw the h-pawn as a first idea, and don’t storm the queenside as if he had gone long. …e5 is the break."
+    },
+    {
+      "id": "fianchetto-center",
+      "system": "fianchetto",
+      "fen": "rnbq1rk1/ppp1ppbp/3p1np1/8/3PP3/2N3P1/PPP1NPBP/R1BQK2R b KQ - 4 6",
+      "side": "black",
+      "prompt": "He has fianchettoed (4.g3, Bg2, Nge2). Setup is done. What’s the plan — and what should you not do yet?",
+      "plans": [
+        {
+          "id": "e5",
+          "label": "Take a share of the center with …e5 (or …c5)."
+        },
+        {
+          "id": "h5",
+          "label": "Start …h5 at once, because a fianchetto always wants the h-file."
+        },
+        {
+          "id": "a6",
+          "label": "Play …a6 and wait."
+        },
+        {
+          "id": "c6",
+          "label": "Only play …c6 and sit."
+        }
+      ],
+      "correctPlans": [
+        "e5"
+      ],
+      "goodMoves": [
+        "e5",
+        "c5",
+        "Nc6"
+      ],
+      "feedbackGood": "Center first. …e5 or …c5 (or …Nc6 heading there) is the plan. An early …h5 against a fianchetto is the same thing that kept going wrong against a fianchettoed king.",
+      "feedbackBad": "Don’t throw …h5 just because he played g3. Take a share of the center (…e5 or …c5) first. The h-file checklist comes after the center is fixed."
+    }
+  ]
+}

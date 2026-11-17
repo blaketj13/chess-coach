@@ -1,0 +1,99 @@
+{
+  "source": "lichess-org/chess-openings (https://github.com/lichess-org/chess-openings)",
+  "note": "Every named opening in ECO A00\u2013E99. Deep, annotated move trees live in the repertoire (Ponziani, Alapin, the c3/d4 family, Scotch/Petrov, London, Caro-Kann, QGD, and the 1.b4 / 1.g3 answers). Everything else has its official name, ECO code, and starting moves. Lichess explorer popularity was not available (the API required authorization from this environment).",
+  "count": 3865,
+  "families": [
+    {
+      "id": "white-c3d4",
+      "name": "Your c3/d4 family (Ponziani, Alapin, French/Caro Advance)",
+      "count": 116,
+      "file": "families/white-c3d4.json",
+      "ecoFrom": "B01",
+      "ecoTo": "C57"
+    },
+    {
+      "id": "open-e4e5",
+      "name": "Open Games (1.e4 e5)",
+      "count": 1018,
+      "file": "families/open-e4e5.json",
+      "ecoFrom": "C20",
+      "ecoTo": "C99"
+    },
+    {
+      "id": "sicilian",
+      "name": "Sicilian Defence",
+      "count": 396,
+      "file": "families/sicilian.json",
+      "ecoFrom": "B20",
+      "ecoTo": "B99"
+    },
+    {
+      "id": "semi-open",
+      "name": "Semi-Open (French, Caro, Pirc, Modern, Scandi, Alekhine, ...)",
+      "count": 500,
+      "file": "families/semi-open.json",
+      "ecoFrom": "B00",
+      "ecoTo": "C19"
+    },
+    {
+      "id": "indian",
+      "name": "Indian Defences (KID, Nimzo, QID, Gr\u00fcnfeld, ...)",
+      "count": 367,
+      "file": "families/indian.json",
+      "ecoFrom": "E00",
+      "ecoTo": "E99"
+    },
+    {
+      "id": "d4-closed",
+      "name": "Queen's Pawn and Closed Games (1.d4 d5, QG, Slav, London, ...)",
+      "count": 644,
+      "file": "families/d4-closed.json",
+      "ecoFrom": "D00",
+      "ecoTo": "D99"
+    },
+    {
+      "id": "flank",
+      "name": "Flank and irregular (English, R\u00e9ti, 1.b4, 1.g3, 1.b3, A00\u2013A99 except Dutch)",
+      "count": 752,
+      "file": "families/flank.json",
+      "ecoFrom": "A00",
+      "ecoTo": "A79"
+    },
+    {
+      "id": "dutch",
+      "name": "Dutch Defence",
+      "count": 71,
+      "file": "families/dutch.json",
+      "ecoFrom": "A80",
+      "ecoTo": "A99"
+    },
+    {
+      "id": "other",
+      "name": "Other openings",
+      "count": 1,
+      "file": "families/other.json",
+      "ecoFrom": "C42",
+      "ecoTo": "C42"
+    }
+  ],
+  "deepOpeningIds": [
+    "ponziani",
+    "alapin",
+    "white-c3d4",
+    "open-games",
+    "london",
+    "caro",
+    "qgd",
+    "sokolsky",
+    "g3"
+  ],
+  "defaultWhite": [
+    "ponziani",
+    "alapin",
+    "white-c3d4"
+  ],
+  "blackCandidates": [
+    "pirc",
+    "modern"
+  ]
+}
