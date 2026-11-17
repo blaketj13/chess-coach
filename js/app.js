@@ -1,5 +1,6 @@
 (function () {
-  const APP_VERSION = "1.5.1";
+  const APP_VERSION = "1.6.0";
+  window.APP_VERSION = APP_VERSION;
   window.APP_VERSION = APP_VERSION;
 
   function notifyAndroidEngine(ok, why) {
@@ -36,7 +37,9 @@
   };
 
   function profile() {
-    return window.PROFILES[state.opponentId];
+    const base = window.PROFILES[state.opponentId] || window.PROFILES["solid-defender"];
+    if (!state.bot) return base;
+    return Object.assign({}, base, { shortName: state.bot.name || base.shortName, elo: state.bot.rating });
   }
   function botColor() {
     return state.playAs === "white" ? "b" : "w";
@@ -140,27 +143,31 @@
   async function chooseEngineMove() {
     const fen = state.chess.fen();
     const p = profile();
-    await state.engine.setStrength(p.elo, p.skill);
     if (window.SCAccount && window.SCAccount.pauseAnalysis) window.SCAccount.pauseAnalysis();
-    const result = await state.engine.analyze(fen, { movetime: (state.playSearch && state.playSearch.movetime) || 250, depth: (state.playSearch && state.playSearch.depth) || 12, multipv: 3 });
-    if (window.SCAccount && window.SCAccount.resumeAnalysis) window.SCAccount.resumeAnalysis(state.engine);
-    const pvs = result.pvs || [];
-    if (!pvs.length && result.bestmove) return result.bestmove;
-    const best = pvs[0];
-    const punishUci = hangingCaptureAmong(state.chess, pvs, botColor());
-    if (punishUci && Math.random() < (p.punishRate || 0.75)) {
-      const that = pvs.find((x) => x.pv[0] === punishUci);
-      const bestCp = best.isMate ? 9000 : best.score;
-      const thatCp = that ? (that.isMate ? 9000 : that.score) : -9999;
-      if (that && bestCp - thatCp <= 80) return punishUci;
+    try {
+      // Humanlike strength by rating (js/strength.js): sampling + plausible misses below 1500, UCI_Elo above. No random blunders.
+      return await window.Strength.pick(state.engine, fen, state.bot ? state.bot.rating : p.elo);
+    } finally {
+      if (window.SCAccount && window.SCAccount.resumeAnalysis) window.SCAccount.resumeAnalysis(state.engine);
     }
-    const errorChance = p.elo >= 1300 ? 0.18 : p.elo >= 1000 ? 0.28 : 0.36;
-    if (pvs[1] && Math.random() < errorChance) {
-      const a = pvs[0].isMate ? 9000 : pvs[0].score;
-      const b = pvs[1].isMate ? 9000 : pvs[1].score;
-      if (a - b <= 100) return pvs[1].pv[0];
-    }
-    return (best && best.pv[0]) || result.bestmove;
+  }
+
+  /** Placement games stop at a soft move cap; the engine scores the position. */
+  async function adjudicate() {
+    try {
+      const res = await state.engine.analyze(state.chess.fen(), { movetime: 400, multipv: 1 });
+      const pv = res.pvs && res.pvs[0];
+      let cp = pv ? (pv.isMate ? (pv.score > 0 ? 5000 : -5000) : pv.score) : 0;
+      if (state.chess.turn() !== blakeColor()) cp = -cp;
+      return cp >= 200 ? "win" : cp <= -200 ? "loss" : "draw";
+    } catch (e) { return "draw"; }
+  }
+  async function capReached() {
+    if (!state.bot || !state.bot.moveCap || state.over) return false;
+    if (state.history.length < state.bot.moveCap * 2) return false;
+    const r = await adjudicate();
+    endGame(r, "Move cap reached. The engine scores it: " + (r === "win" ? "you're better." : r === "loss" ? "they're better." : "about even."));
+    return true;
   }
 
   async function refreshEval() {
@@ -274,10 +281,8 @@
     window.board.setPosition(state.chess.fen(), { from: mv.from, to: mv.to });
     window.board.setHighlights([]);
     if (window.board.setArrows) window.board.setArrows([]);
-    if (window.Sound) {
-      if (mv.captured) window.Sound.capture();
-      else window.Sound.move();
-    }
+    if (window.Feel) window.Feel.moved(mv, state.chess);
+    else if (window.Sound) { if (mv.captured) window.Sound.capture(); else window.Sound.move(); }
     setPhase();
     return mv;
   }
@@ -294,6 +299,23 @@
   function endGame(result, reason) {
     state.over = true;
     state.thinking = false;
+    // Badges come from real games only.
+    if (window.Badges && state.history.length >= 6) {
+      try { window.Badges.fromGame(state.history, blakeColor(), result, { fen: state.startFen || undefined }); } catch (e) { console.warn(e); }
+    }
+    const onEnd = state.onEnd;
+    if (onEnd) {
+      state.onEnd = null; state.bot = null;
+      status(reason || "Game over");
+      if (window.Progress) window.Progress.touchDay(4);
+      setTimeout(() => { try { onEnd(result); } catch (e) { console.error(e); } }, 600);
+      return;
+    }
+    if (window.Progress && state.history.length >= 10) {
+      const p = profile();
+      window.Progress.rate(p.elo, result === "win" ? 1 : result === "draw" ? 0.5 : 0, "spar");
+      window.Progress.touchDay(4);
+    }
     hideTakeback();
     status(reason || (result === "win" ? "You won" : result === "loss" ? "You lost" : "Draw"));
     const moments = state.log.filter((ev) => ev.severe || ev.type === "eval_drop" || ev.type === "hung_piece" || ev.drop >= 150);
@@ -303,7 +325,7 @@
     lines.push("The bot followed " + state.bookHits + " of its own opening moves before leaving the book.");
     const hung = state.log.filter((e) => e.type === "hung_piece" || (e.type === "eval_drop" && /queen|rook|knight|bishop/.test(e.text || ""))).length;
     if (top.length) lines.push("Here are the three moments most worth a second look. You can replay any of them from the position before the move.");
-    else lines.push("No big warning from Wes this time. Nice and careful. The habit still holds: what did his last move threaten, is anything of yours hanging, and is anything of his?");
+    else lines.push("Clean game. No big slips. Keep the habit: their threat, your loose pieces, theirs.");
 
     const box = $("#postgame");
     box.hidden = false;
@@ -453,10 +475,8 @@
     state.uciHistory.push(uci);
     state.history.push(mv);
     window.board.setPosition(state.chess.fen(), { from: mv.from, to: mv.to });
-    if (window.Sound) {
-      if (mv.captured) window.Sound.capture();
-      else window.Sound.move();
-    }
+    if (window.Feel) window.Feel.moved(mv, state.chess);
+    else if (window.Sound) { if (mv.captured) window.Sound.capture(); else window.Sound.move(); }
     setPhase();
     maybeLeaveTheory();
     status("Your move");
@@ -465,6 +485,7 @@
       endGame(ended, ended === "win" ? "Checkmate — you win." : ended === "loss" ? "Checkmate." : "Game drawn.");
       return;
     }
+    if (await capReached()) return;
     await refreshEval();
     showLiveHints();
     if (state.mode !== "off" && state.evalCp != null && state.evalCp >= 300) {
@@ -525,6 +546,7 @@
       endGame(ended, ended === "win" ? "Checkmate — you win." : ended === "loss" ? "Checkmate." : "Game drawn.");
       return;
     }
+    if (await capReached()) return;
     maybeLeaveTheory();
     await botTurn();
   }
@@ -610,7 +632,7 @@
       return;
     }
     state.thinking = true;
-    status("Wes is looking at that…");
+    status("Checking that move…");
     let review;
     try {
       review = await reviewBlakeMove(chessBefore, mv, state.chess);
@@ -666,6 +688,8 @@
     state.bookPlies = 0;
     state.thinking = false;
     state.lastCueId = null;
+    if (!opts.keepBot) { state.bot = null; state.onEnd = null; }
+    state.startFen = opts.fen || null;
     if (opts.fen) {
       try {
         const c = new Chess(opts.fen);
@@ -706,7 +730,9 @@
       try { $("#color-select").value = color; } catch (e) {}
       state.playAs = color;
     }
-    await newGame({ keepColor: !!opts.color, keepOpp: !!opts.opponentId, fen: opts.fen, note: opts.note });
+    state.bot = opts.bot || null;
+    state.onEnd = opts.onEnd || null;
+    await newGame({ keepColor: !!opts.color, keepOpp: !!opts.opponentId, fen: opts.fen, note: opts.note, keepBot: true });
   }
 
   async function playFromFen(opts) {
@@ -745,15 +771,30 @@
 
   async function init() {
     setEngineLabel("Engine warming…", false);
-    if (window.Sound) {
-      const btn = $("#btn-sound");
-      if (btn) {
-        btn.textContent = window.Sound.on ? "Sound on" : "Sound off";
-        btn.addEventListener("click", () => {
-          const on = window.Sound.toggle();
-          btn.textContent = on ? "Sound on" : "Sound off";
+    if (window.Feel) {
+      const m = $("#btn-mute"), r = $("#btn-motion"), c = $("#btn-character");
+      if (m) m.addEventListener("click", () => window.Feel.toggleMute());
+      if (r) r.addEventListener("click", () => window.Feel.toggleReducedMotion());
+      if (c) c.addEventListener("click", () => { const sh = $("#settings-sheet"); if (sh) sh.hidden = true; window.Adventure && window.Adventure.openEditor(); });
+      // Inline rename lives in Settings only while it is open (one character-name field on screen at a time).
+      const so = $("#btn-settings"), host = $("#char-edit-fields");
+      const fillName = () => {
+        if (!host) return;
+        const ch = (window.Adventure && window.Adventure.getCharacter()) || {};
+        host.innerHTML = '<label class="field">Character name <input id="set-char-name" data-testid="character-name" maxlength="18" autocomplete="off"></label>' +
+          '<button type="button" class="ghost" data-testid="character-save" id="set-char-save">Save name</button>';
+        const nm = $("#set-char-name"), sv = $("#set-char-save");
+        nm.value = ch.name || "";
+        sv.addEventListener("click", () => {
+          const c2 = Object.assign({}, (window.Adventure && window.Adventure.getCharacter()) || {});
+          c2.name = (nm.value || "").trim() || c2.name || "Player";
+          window.Adventure.setCharacter(c2);
+          sv.textContent = "Saved";
+          setTimeout(() => { sv.textContent = "Save name"; }, 1200);
         });
-      }
+      };
+      if (so) so.addEventListener("click", fillName);
+      window.Feel.apply && window.Feel.apply();
     }
     window.board = new window.BoardUI($("#board"), {
       flipped: false,
@@ -979,11 +1020,11 @@
       const nDrills = F && F.drills && F.drills.length;
       const nGames = F && F.modelGames && F.modelGames.length;
       const hasH = !!(F && F.hFileChecklist && F.hFileChecklist.length === 6);
-      const hasModel = !!(F && F.modelGames && F.modelGames.some(function (g) { return g.id === "blake-hfile-164647551662"; }));
+      const hasModel = !!(F && F.modelGames && F.modelGames.every(function (g) { return !/^blake-/.test(g.id || "") && !/chess\.com/i.test(g.url || ""); }));
       const hasNew = !!(F && F.drills && ["h4-better-be3","e4-uncastled-hstorm","h5-early-rb1","h3-ne3-hangs"].every(function (id) {
         return F.drills.some(function (d) { return d.id === id; });
       }));
-      log(nDrills >= 11 && nGames >= 5 && hasH && hasModel && hasNew,
+      log(nDrills >= 11 && nGames >= 3 && hasH && hasModel && hasNew,
         "Fianchetto module loaded (" + (nDrills || 0) + " drills, " + (nGames || 0) + " model games, checklist=" + hasH + ")");
 
       const hPos = new Chess("rn1q1rk1/1b2ppbp/pp6/3p1pP1/3P4/2N2N1P/PPP5/R1BQK1R1 w Q - 0 15");
@@ -1149,7 +1190,44 @@
     window.__qa.lastTest = results;
   }
 
-  window.__qa = {
+  /* 1.6.0 hooks: rating, strength, tracks, adventure, placement. */
+  (function qa16() {
+    const q = window.__qa = window.__qa || {};
+    const A = () => window.Adventure, Pr = () => window.Progress;
+    const def = (k, get) => { try { Object.defineProperty(q, k, { get, configurable: true, enumerable: true }); } catch (e) {} };
+    def("rating", () => { const r = Pr().get().rating; return { estimate: Math.round(r.estimate), rd: Math.round(r.rd), games: r.games }; });
+    def("adventureStart", () => (window.Lessons && window.Lessons.data() ? A().start() : null));
+    def("trainLessonId", () => "u2-hanging");
+    def("character", () => A().getCharacter());
+    Object.assign(q, {
+      getRating: () => q.rating,
+      adventureNode: (lessonId) => {
+        const list = A().nodes();
+        if (lessonId) { const n = A().nodeForLesson(lessonId); return n ? (list.find((x) => x.id === n.id) || n) : null; }
+        return list.find((x) => !x.complete && !x.locked) || null;
+      },
+      setRating: (n) => { A().setRating(n); return q.rating; },
+      strength: (r) => window.Strength.strength(r == null ? Pr().get().rating.estimate : r),
+      bossStrength: () => A().bossStrength(),
+      rivalStrength: () => A().rivalStrength(),
+      engineMode: (r) => window.Strength.engineMode(r == null ? Pr().get().rating.estimate : r),
+      startPlacement: () => A().startPlacement(),
+      finishPlacement: (res) => A().finishPlacement(res),
+      completeTrainLesson: (id) => window.Journey.completeFromLesson(id || "u2-hanging", 1),
+      openTrain: () => window.UI.showTab("train"),
+      openAdventure: () => window.UI.showTab("adventure"),
+      openHome: () => window.UI.showTab("today"),
+      lessons: () => window.Lessons.list(),
+      progress: () => Pr().get()
+    });
+    const boot = () => setTimeout(() => {
+      try { A() && A().ensureCharacter(); } catch (e) {}
+      if (window.Lessons && window.Packs) window.Lessons.load().then(() => window.Packs.loadBundled()).then((r) => { (r || []).forEach((x) => { if (!x.ok) console.warn("pack rejected:", x.reason); }); }).catch(() => {});
+    }, 60);
+    if (document.readyState === "complete") boot(); else window.addEventListener("load", boot);
+  })();
+
+  window.__qa = Object.assign(window.__qa || {}, {
     state: state,
     fen() { return state.chess.fen(); },
     status() { return ($("#status") && $("#status").textContent) || ""; },
@@ -1204,7 +1282,7 @@
       setPhase();
       status("Your move");
     },
-  };
+  });
 
   document.addEventListener("DOMContentLoaded", init);
 })();

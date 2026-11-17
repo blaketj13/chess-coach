@@ -1,6 +1,6 @@
 /* Cache runtime assets, including the unmodified Stockfish wasm, for offline and repeat loads.
    The engine files are stored as-is and never rewritten. */
-const CACHE = "sparring-coach-1.5.1";
+const CACHE = "sparring-coach-1.6.0";
 const PRECACHE = [
   "./",
   "./index.html",
@@ -8,7 +8,9 @@ const PRECACHE = [
   "./favicon.svg",
   "./icon.png",
   "./vendor/chess.js",
+  "./js/chess-san.js",
   "./js/db.js",
+  "./js/entitlements.js",
   "./js/fsrs.js",
   "./js/account.js",
   "./js/think.js",
@@ -23,9 +25,22 @@ const PRECACHE = [
   "./js/openings.js",
   "./js/find.js",
   "./js/practice.js",
+  "./js/progress.js",
+  "./js/strength.js",
+  "./js/feel.js",
+  "./js/lessons.js",
+  "./js/pack-key.js",
+  "./js/packs.js",
+  "./js/adventure.js",
+  "./js/rush.js",
+  "./js/badges.js",
   "./js/ui.js",
   "./js/drill-audit.js",
   "./js/app.js",
+  "./vendor/noble-ed25519.mjs",
+  "./data/lessons/units.json",
+  "./data/lessons/rush.json",
+  "./data/packs/weekly-sample.json",
   "./engine/stockfish/stockfish-19-lite-single.js",
   "./engine/stockfish/stockfish-19-lite-single.wasm"
 ];

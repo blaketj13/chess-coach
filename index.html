@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <title>Sparring Coach 1.5.1</title>
+  <title>Sparring Coach 1.6.0</title>
   <link rel="stylesheet" href="styles.css" />
   <script>
     // Android draws edge to edge; the app hands over the bar sizes so nothing sits under them.
@@ -32,6 +32,9 @@
     <main class="main">
       <section id="today-view"></section>
       <section id="train-view" hidden></section>
+      <section id="adventure-view" hidden></section>
+      <section id="lesson-view" hidden></section>
+      <section id="rush-view" hidden></section>
       <section id="think-view" hidden></section>
       <section id="play-view" hidden>
         <div id="lobby" class="lobby">
@@ -72,7 +75,7 @@
                 <div class="wes-row">
                   <div class="wes-avatar" aria-hidden="true">W</div>
                   <div>
-                    <div class="wes-name">Wes</div>
+                    <div class="wes-name">Coach</div>
                     <div class="wes-role">Coach</div>
                   </div>
                 </div>
@@ -96,8 +99,12 @@
 
     <nav class="tabbar" aria-label="Sections">
       <button type="button" class="tab on" data-tab="today">
-        <span class="tab-icon" aria-hidden="true">☀</span>
-        <span>Today</span>
+        <span class="tab-icon" aria-hidden="true">⌂</span>
+        <span>Home</span>
+      </button>
+      <button type="button" class="tab" data-tab="adventure">
+        <span class="tab-icon" aria-hidden="true">⛰</span>
+        <span>Adventure</span>
       </button>
       <button type="button" class="tab" data-tab="train">
         <span class="tab-icon" aria-hidden="true">📖</span>
@@ -149,12 +156,20 @@
         </label>
         <div class="toolbar-actions">
           <button type="button" class="btn primary" id="new-game">New game</button>
-          <button type="button" id="btn-sound" class="ghost" title="Sound">Sound off</button>
+        </div>
+        <div class="toolbar-actions feel-toggles">
+          <button type="button" class="ghost" data-testid="mute" id="btn-mute" aria-pressed="false">Sound on</button>
+          <button type="button" class="ghost" data-testid="reduced-motion" id="btn-motion" aria-pressed="false">Motion on</button>
+        </div>
+        <div class="char-edit" data-testid="character-edit">
+          <div id="char-edit-fields"></div>
+          <div class="toolbar-actions">
+            <button type="button" class="ghost" id="btn-character">Change look</button>
         </div>
       </div>
       <details id="about-panel" class="about-panel">
         <summary>About</summary>
-        <p><span class="app-ver">Sparring Coach 1.5.1.</span> An offline opening and sparring coach.</p>
+        <p><span class="app-ver">Sparring Coach 1.6.0.</span> An offline opening and sparring coach.</p>
         <p class="credit">© 2026 SpotVibe LLC. All rights reserved. The app’s own code is proprietary to SpotVibe LLC and is not open source.</p>
         <p class="credit">Style-mimic bots play from books built from the public-domain Lichess openings dataset (CC0), then Stockfish at a similar strength. Eval numbers stay hidden during the game. No account needed.</p>
         <p class="credit">Attacking ideas and the thinking routine are inspired by GM Igor Smirnov’s public teaching (Remote Chess Academy). Not affiliated with or endorsed by him or RCA.</p>
@@ -166,6 +181,8 @@
         <p class="credit"><strong>Cburnett</strong> piece set © Colin M.L. Burnett, CC BY-SA 3.0, via Lichess. <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a>. <a href="licenses/CBURNETT-CC-BY-SA-3.0.txt">Attribution</a>.</p>
         <p class="credit"><strong>lichess-org/chess-openings</strong> ECO data is CC0 1.0. <a href="https://github.com/lichess-org/chess-openings" target="_blank" rel="noopener">Dataset</a>. <a href="licenses/LICHESS-OPENINGS-CC0.txt">CC0 notice</a>.</p>
         <p class="credit"><strong>chess.js</strong> 0.12.1 is © Jeff Hlywa, BSD-2-Clause. <a href="licenses/CHESSJS-BSD-2.txt">License</a>.</p>
+        <p class="credit"><strong>Lichess puzzle database</strong> positions used in lessons, Rush and packs are CC0 1.0. <a href="https://database.lichess.org/#puzzles" target="_blank" rel="noopener">Source</a>.</p>
+        <p class="credit"><strong>@noble/ed25519</strong> 2.3.0 is © Paul Miller, MIT. <a href="licenses/NOBLE-ED25519-MIT.txt">License</a>.</p>
       </details>
     </div>
   </div>
@@ -173,6 +190,7 @@
   <script src="vendor/chess.js"></script>
   <script src="js/chess-san.js"></script>
   <script src="js/db.js"></script>
+  <script src="js/entitlements.js"></script>
   <script src="js/fsrs.js"></script>
   <script src="js/account.js"></script>
   <script src="js/think.js"></script>
@@ -187,6 +205,15 @@
   <script src="js/openings.js"></script>
   <script src="js/find.js"></script>
   <script src="js/practice.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/strength.js"></script>
+  <script src="js/feel.js"></script>
+  <script src="js/lessons.js"></script>
+  <script src="js/pack-key.js"></script>
+  <script src="js/packs.js"></script>
+  <script src="js/adventure.js"></script>
+  <script src="js/rush.js"></script>
+  <script src="js/badges.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/drill-audit.js"></script>
   <script src="js/app.js"></script>

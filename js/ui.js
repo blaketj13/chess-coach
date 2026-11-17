@@ -214,13 +214,13 @@
   }
 
   function hideViews() {
-    ["today", "play", "train", "openings", "clarity", "think"].forEach((id) => {
+    ["today", "play", "train", "openings", "clarity", "think", "adventure", "lesson", "rush"].forEach((id) => {
       const el = document.getElementById(id + "-view");
       if (el) el.hidden = true;
     });
   }
   function markTab(name) {
-    const tab = (name === "openings" || name === "clarity" || name === "think") ? "train" : name;
+    const tab = (name === "openings" || name === "clarity" || name === "think" || name === "lessons") ? "train" : name;
     $$(".tab").forEach((t) => t.classList.toggle("on", t.getAttribute("data-tab") === tab));
   }
   function thinkOpts() {
@@ -246,7 +246,9 @@
         else showTab("play");
       },
       onDone: function () { showTab("today"); },
-      onBack: function () { showTab("today"); }
+      onBack: function () { showTab("today"); },
+      onAdventure: function () { showTab("adventure"); },
+      onTrain: function () { showTab("train"); }
     };
   }
   function showTab(name, extra) {
@@ -254,6 +256,15 @@
     if (name === "drills") name = "clarity";
     markTab(name);
     hideViews();
+    document.querySelectorAll(".overlay.adv-ov, .overlay.feel-ov").forEach((x) => { if (!x.matches("[data-testid=placement-game]")) x.remove(); });
+    if (name === "adventure") {
+      const el = document.getElementById("adventure-view") || (window.Adventure && (window.Adventure.render(), document.getElementById("adventure-view")));
+      if (el) { el.hidden = false; if (window.Adventure) window.Adventure.render(el); }
+      AppChrome.setTitle("Adventure");
+      AppChrome.setBack(null);
+      return;
+    }
+    if (name === "lessons") name = "train";
     if (name === "today") {
       const el = document.getElementById("today-view");
       if (el) { el.hidden = false; if (window.SCToday) window.SCToday.renderToday(el, todayOpts()); }
@@ -271,7 +282,15 @@
       if (el) {
         el.hidden = false;
         if (window.SCToday) window.SCToday.renderTrain(el, {
-          onThink: function () { showTab("think"); },
+          onOpening: async function (id) {
+            showTab("openings");
+            if (!UI._dataLoaded) await loadData();
+            openOpening(id);
+            AppChrome.setBack(function () { showTab("train"); });
+          },
+          engine: UI.hooks && UI.hooks.engine && UI.hooks.engine(),
+          onThink: function (card) { showTab("think", card); },
+          onDone: function () { showTab("train"); },
           onLessons: function () { showTab("openings"); },
           onDrills: function () { showTab("clarity"); }
         });
@@ -369,7 +388,7 @@
     const whyHtml =
       (F.why ? "<p>" + esc(F.why) + "</p>" : "") +
       (p1.intro ? "<p>" + esc(p1.intro) + "</p>" : "") +
-      (p1.vsAnthony ? "<p>" + esc(p1.vsAnthony) + "</p>" : "") +
+      (p1.vsFlank ? "<p>" + esc(p1.vsFlank) + "</p>" : "") +
       (p1.hFileIntro ? "<p>" + esc(p1.hFileIntro) + "</p>" : "") +
       (F.hFileChecklist && F.hFileChecklist.length ? "<ol class=\"h-checklist\">" + F.hFileChecklist.map(function (it) {
         return "<li><strong>" + esc(it.name) + ".</strong> " + esc(it.rule) + "</li>";
@@ -491,7 +510,7 @@
     $("#back-f", root).addEventListener("click", () => { UI.sub = "fianchetto"; renderOpenings(); });
     const whyBox = $("#d-why-panel", root);
     const plans = d.planChoices || [];
-    whyBox.innerHTML = (d.fromGame ? "<p>From one of your games" + (d.fromGame.url ? ": <a href=\"" + esc(d.fromGame.url) + "\" target=\"_blank\" rel=\"noopener\">open it</a>" : "") + ".</p>" : "") +
+    whyBox.innerHTML = (d.fromGame && d.fromGame.note ? "<p>" + esc(d.fromGame.note) + "</p>" : "") +
       (plans.length ? "<p>What’s the plan?</p>" : "") + (d.prompt && d.prompt !== cue ? "<p>" + esc(d.prompt) + "</p>" : "");
     const pc = $("#plan-choices", root);
     plans.forEach((c) => {
@@ -587,7 +606,7 @@
         "<p class=\"muted\">Question " + (i + 1) + " of " + questions.length + "</p>" +
         "<h3>" + esc(q.text) + "</h3>" +
         "<div class=\"choices\">" + q.choices.map((c) =>
-          "<button type=\"button\" class=\"choice" + (answers[q.id] === c.id ? " on" : "") + "\" data-c=\"" + esc(c.id) + "\">" + esc(c.label) + "</button>"
+          "<button type=\"button\" class=\"card-link choice" + (answers[q.id] === c.id ? " on" : "") + "\" data-c=\"" + esc(c.id) + "\">" + esc(c.label) + "</button>"
         ).join("") + "</div>";
       $$("[data-c]", body).forEach((btn) => btn.addEventListener("click", () => {
         answers[q.id] = btn.getAttribute("data-c");
@@ -790,6 +809,9 @@
     AppChrome.setTitle(o.name);
     AppChrome.setBack(() => backHome());
     const prog = window.Openings.openingProgress(o);
+    const nextCh = (o.chapters || []).find((ch) => { const p = window.Openings.chapterProgress(o, ch); return !(p.total && p.known >= p.total); });
+    const contCh = nextCh || (o.chapters || [])[0];
+    const contHtml = contCh ? "<button type=\"button\" class=\"primary\" id=\"op-continue\" data-testid=\"opening-continue\">" + (nextCh ? "Continue: " : "Review: ") + esc(contCh.name) + "</button>" : "";
     const chs = (o.chapters || []).map((ch) => {
       const p = window.Openings.chapterProgress(o, ch);
       const learned = p.total && p.known >= p.total;
@@ -810,11 +832,14 @@
     root.innerHTML =
       "<div class=\"op-page\">" +
       "<p class=\"muted\">" + esc(shortOpeningName(o)) + " · " + chaptersDone(o).done + " of " + chaptersDone(o).total + " chapters</p>" +
+      contHtml +
       "<div class=\"nav-row\">" +
       "<button type=\"button\" class=\"sub-link\" id=\"btn-which\">Which line?</button>" +
       "<button type=\"button\" class=\"sub-link\" id=\"btn-compare\">Compare</button>" +
       (o.id === "pirc" ? "<button type=\"button\" class=\"sub-link\" id=\"btn-to-plans\">Plans</button>" : "") +
       "</div>" + chs + "</div>";
+    const cont = $("#op-continue", root);
+    if (cont) cont.addEventListener("click", () => startLearn(o, contCh, nextCh ? "guided" : "solo"));
     const which = $("#btn-which", root);
     if (which) which.addEventListener("click", () => startWhichLine(o));
     const cmp = $("#btn-compare", root);
@@ -1382,6 +1407,10 @@
   };
   UI.loadData = loadData;
   UI.showTab = showTab;
+  UI.openLessonsTrack = function () { showTab("train"); };
+  UI.openTrain = function () { showTab("train"); };
+  UI.openJourneyLog = function () { if (window.Journey) window.Journey.openLog(); };
+  UI.refresh = function () { const on = document.querySelector(".tab.on"); showTab(on ? on.getAttribute("data-tab") : "today"); };
   UI.renderOpenings = renderOpenings;
   UI.renderClarity = renderClarity;
   UI.renderFind = renderFind;

@@ -322,7 +322,7 @@
       }
     }
 
-    /* H-pawn timing + the six-point checklist from Blake’s your own games. */
+    /* H-pawn timing + the six-point checklist. */
     const fianchettoSetup = them === "w"
       ? (pawnOn(chess, "g3", "w") || hasBishop(chess, "g2", "w") || pawnOn(chess, "b3", "w") || hasBishop(chess, "b2", "w"))
       : (pawnOn(chess, "g6", "b") || hasBishop(chess, "g7", "b") || pawnOn(chess, "b6", "b") || hasBishop(chess, "b7", "b"));

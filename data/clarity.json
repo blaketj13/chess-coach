@@ -7,7 +7,7 @@
     {
       "id": "open-center-rousseau",
       "title": "Center opening vs an uncastled king",
-      "from": "A typical test of the Rousseau, and the same open-center problem that has cost you your own games.",
+      "from": "A typical test of the Rousseau: the open-center problem that costs club players games.",
       "fen": "r1bqkbnr/pppp2pp/2n5/4pp2/2BPP3/5N2/PPP2PPP/RNBQK2R b KQkq - 0 4",
       "side": "black",
       "lastMove": {
@@ -76,8 +76,8 @@
         "fxe4"
       ],
       "movePrompt": "Play …fxe4. Your f-pawn on f5 takes his pawn on e4, meeting d4 in the center.",
-      "feedbackGood": "…fxe4 is the right first capture (the pawn on f5 takes on e4). Next you meet Nxe5 with …d5 (or …Nxe5 if he has already castled). Get the king out of the middle as soon as the tactics allow.",
-      "feedbackBad": "The center is opening and your king is on e8. Take on e4 (…fxe4) and be ready for Nxe5. A flank move, or a slow developing move that leaves e5 and the king hanging, is how these positions get away from you."
+      "feedbackGood": "…fxe4 is the right capture. Meet Nxe5 with …d5, then get the king out of the middle as soon as tactics allow.",
+      "feedbackBad": "The center is opening with your king on e8. Take on e4 with …fxe4 and be ready for Nxe5. Slow moves let it slip."
     },
     {
       "id": "hanging-queen",
@@ -159,7 +159,7 @@
       ],
       "movePrompt": "Save the queen, or take something that makes leaving it worthwhile. Don’t leave it hanging.",
       "feedbackGood": "You dealt with the loose queen. That’s the routine working: notice what’s hanging before you look for a plan.",
-      "feedbackBad": "The queen on a2 is loose. A move that doesn’t save it, or take enough in return, fails the last check of the routine: try to break your own candidate."
+      "feedbackBad": "The queen on a2 is loose. A move that doesn't save it, or win enough back, fails the last check: break your own idea."
     },
     {
       "id": "g3-too-early",
@@ -236,7 +236,7 @@
         "c6"
       ],
       "movePrompt": "Take a share of the center, or start the Pirc/Modern setup. Don’t push …h5.",
-      "feedbackGood": "That’s the right first idea: the center, or a normal developing setup. Save the h-pawn for after the center is fixed and your king is safe.",
+      "feedbackGood": "Right first idea: the center, or normal development. Save the h-pawn until the center is fixed and your king is safe.",
       "feedbackBad": "…h5 is too early. The center is wide open and your king is still on e8. Play …e5, …d5, or a Pirc/Modern setup (…g6, …d6)."
     },
     {
@@ -300,7 +300,7 @@
             "Only check whether you can castle."
           ],
           "correct": 0,
-          "explain": "That’s checklist item 6: is anything hanging before you push? In your games, that rook on a8 was taken more than once."
+          "explain": "That’s checklist item 6: is anything hanging before you push? At club level, that a8 rook gets taken all the time."
         }
       ],
       "goodMoves": [
@@ -309,7 +309,7 @@
         "Bb7"
       ],
       "movePrompt": "Move the rook, or block the diagonal (…c6 or …Bb7). Castling does not save a8.",
-      "feedbackGood": "You treated a8 as a real problem — the rook moved or the diagonal closed. That’s the long-diagonal check, the same one Wes will flag in live games.",
+      "feedbackGood": "You treated a8 as a real problem: the rook moved or the diagonal closed. That's the long-diagonal check the coach flags live.",
       "feedbackBad": "The rook on a8 can be taken right now by the bishop on g2. Castling doesn’t save it. Play …Rb8, …c6, or …Bb7."
     },
     {
@@ -381,7 +381,7 @@
       ],
       "movePrompt": "Play the central break that wakes up the g7 bishop.",
       "feedbackGood": "…e5 is the plan. Same-side castling, nothing forcing: improve the bishop by opening the center, then play where your pawns point.",
-      "feedbackBad": "Nothing is forcing, so you improve the worst piece. The g7 bishop wants …e5. An h-pawn storm or a random wing move isn’t the routine here."
+      "feedbackBad": "Nothing is forcing, so improve your worst piece. The g7 bishop wants …e5. A wing storm isn't the routine here."
     },
     {
       "id": "candidate-break",

@@ -3115,7 +3115,7 @@
             "1...e6": "2.d4 d5 3.e5 c5 4.c3, the French Advance. c3 is already the book move.",
             "1...c6": "2.d4 d5 3.e5, the Caro Advance. When he plays ...c5, c3 supports d4. Or 3.exd5 cxd5 4.Bd3 and c3.",
             "1...d5": "2.exd5 Qxd5 3.Nc3, then d4. Early c3 is too soft here.",
-            "1...d6 / 1...g6": "If he plays a Pirc or Modern against you, 2.d4 and a normal center is fine. You don't have to force c3.",
+            "1...d6 / 1...g6": "If they play a Pirc or Modern, 2.d4 and a normal center is fine. You don't have to force c3.",
             "1...Nf6": "Alekhine: 2.e5 Nd5 3.d4, a space-plus center, not a c3 opening."
           },
           "tree": {
@@ -19258,7 +19258,7 @@
                 "uci": "g2g3",
                 "san": "g3",
                 "side": "them",
-                "idea": "The fianchetto. White's most common public first move, and a regular weapon against you.",
+                "idea": "The fianchetto. A common club first move, and a regular weapon at club level.",
                 "main": true,
                 "structure": "",
                 "plan": "",

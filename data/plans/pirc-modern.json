@@ -158,8 +158,8 @@
         "c5",
         "Nc6"
       ],
-      "feedbackGood": "That’s the plan. …c5 or …Nc6 (heading for …e5) both hit the big center and wake up the g7 bishop. An early …h5 is the wrong reflex while the center is still fluid.",
-      "feedbackBad": "The g7 bishop wants a pawn trade in the center. …c5 (Dragon-style) or …Nc6 and …e5 are the breaks. Don’t start an h-pawn storm with the center still open, and don’t sit still behind …d6."
+      "feedbackGood": "That's the plan. …c5 or …Nc6 heading for …e5 hits the center and wakes the g7 bishop. An early …h5 is the wrong reflex.",
+      "feedbackBad": "The g7 bishop wants a central pawn trade: …c5, or …Nc6 and …e5. No h-pawn storm while the center is open."
     },
     {
       "id": "150-b5",
@@ -193,8 +193,8 @@
         "Nbd7",
         "a5"
       ],
-      "feedbackGood": "Opposite-side race. Your a- and b-pawns, plus the g7 bishop, are the attack. …Qa5 or …Nbd7 keeps it moving. Castling short now hands him a target for Bh6 and the h-pawn.",
-      "feedbackBad": "He just went long. This is a race on the queenside: …Qa5, …Nbd7, and the a- and b-pawns, with the g7 bishop behind them. Castling short now gives his Bh6 and h-pawn a fixed target."
+      "feedbackGood": "Opposite-side race. Your a- and b-pawns plus the g7 bishop are the attack. …Qa5 or …Nbd7 keeps it moving.",
+      "feedbackBad": "White went long, so race on the queenside: …Qa5, …Nbd7, a- and b-pawns. Castling short hands Bh6 and the h-pawn a target."
     },
     {
       "id": "classical-e5",
@@ -227,7 +227,7 @@
         "e5"
       ],
       "feedbackGood": "Same-side castling: use the center. …e5 is the break the g7 bishop wants. The h-pawn storm is not the first idea here.",
-      "feedbackBad": "Both kings are short. Don’t throw the h-pawn as a first idea, and don’t storm the queenside as if he had gone long. …e5 is the break."
+      "feedbackBad": "Both kings are short. Don't throw the h-pawn first, and don't storm the queenside as if White went long. …e5 is the break."
     },
     {
       "id": "fianchetto-center",
@@ -261,8 +261,8 @@
         "c5",
         "Nc6"
       ],
-      "feedbackGood": "Center first. …e5 or …c5 (or …Nc6 heading there) is the plan. An early …h5 against a fianchetto is the same thing that kept going wrong against a fianchettoed king.",
-      "feedbackBad": "Don’t throw …h5 just because he played g3. Take a share of the center (…e5 or …c5) first. The h-file checklist comes after the center is fixed."
+      "feedbackGood": "Center first. …e5 or …c5, or …Nc6 heading there, is the plan. An early …h5 against a fianchetto keeps going wrong.",
+      "feedbackBad": "Don't throw …h5 just because White played g3. Take a share of the center with …e5 or …c5 first."
     }
   ]
 }

@@ -121,7 +121,7 @@
       "<li><span class=\"wl-dot\" aria-hidden=\"true\">10</span>I build a daily 10 from your games</li>" +
       "<li><span class=\"wl-dot\" aria-hidden=\"true\">⌂</span>Your games stay on this device</li>" +
       "</ul>" +
-      "<button type=\"button\" class=\"btn primary wl-cta\" id=\"td-connect\">Connect your account</button>" +
+      "<button type=\"button\" class=\"btn primary wl-cta\" id=\"hm-connect\">Connect your account</button>" +
       "<p class=\"wl-fine\">Lichess, Chess.com, or a PGN file</p>" +
       "</section>" +
       "<h3 class=\"wl-section\">Start now</h3>" +
@@ -147,89 +147,120 @@
     $("#td-spar", root).addEventListener("click", function () { if (opts.onSpar && persona) opts.onSpar(persona); });
   }
 
+  /* Home: one primary action (the named next step), two tracks, the daily set, a quiet streak. */
   async function renderToday(root, opts) {
     opts = opts || {};
     const acc = window.SCAccount ? await window.SCAccount.getAccount() : null;
     const prog = window.SCAccount ? await window.SCAccount.getProgress() : {};
     const an = window.SCAccount && window.SCAccount.analysisStatus ? window.SCAccount.analysisStatus() : { running: false, done: 0, total: 0, cards: 0 };
-    const spots = window.SCAccount ? await window.SCAccount.weakSpots() : [];
+    const spots = acc && window.SCAccount ? await window.SCAccount.weakSpots() : [];
     const cards = window.SCDB ? ((await window.SCDB.all("cards")) || []) : [];
     const due = window.SCFSRS ? window.SCFSRS.due(cards) : [];
     const day = window.SCAccount && window.SCAccount.todayKey ? window.SCAccount.todayKey() : "";
     const todayDone = (prog.todayDate === day) ? (prog.todayDone || 0) : 0;
-    if (opts.engine && window.SCAccount && window.SCAccount.analyzeQueued && acc) {
-      window.SCAccount.analyzeQueued(opts.engine);
-    }
+    if (opts.engine && window.SCAccount && window.SCAccount.analyzeQueued && acc) window.SCAccount.analyzeQueued(opts.engine);
+    if (acc && window.Badges) window.Badges.scanLinked().catch(function () {});
+    if (window.Lessons) await window.Lessons.load().catch(function () {});
+    const P = window.Progress ? window.Progress.get() : null;
+    const ch = P && P.character;
+    const placed = P && (P.placement.status === "done" || P.placement.status === "new");
+    const next = window.Journey && window.Lessons && window.Lessons.data() ? window.Journey.nextStep() : null;
+    const st = window.Journey && window.Lessons && window.Lessons.data() ? window.Journey.start() : null;
+    const lv = window.Progress ? window.Progress.levelOf(P.xp) : { level: 1 };
+    const head = "<div class=\"home-head\">" + (window.Adventure ? window.Adventure.avatarSVG(ch, 48) : "") +
+      "<div class=\"hh-copy\"><b>" + esc((ch && ch.name) || "Player") + "</b><span class=\"muted\">Level " + lv.level + " · " + esc(window.Progress ? window.Progress.ratingLabel() : "") + "</span></div>" +
+      (window.Feel ? window.Feel.streakRing() : "") + "</div>";
+    let primary;
+    if (!placed && P && P.placement.status !== "later") {
+      primary = "<section class=\"home-hero\"><p class=\"wl-eyebrow\">First, your level</p><h2 class=\"wl-title\">Three quick games. Then we know where to start.</h2>" +
+        "<button type=\"button\" class=\"primary wl-cta\" id=\"hm-place\">Play placement games</button>" +
+        "<div class=\"hero-links\"><button type=\"button\" class=\"text-btn\" id=\"hm-new\">I'm brand new</button><button type=\"button\" class=\"text-btn\" id=\"hm-later\">Later</button></div></section>";
+    } else if (next) {
+      primary = "<section class=\"home-hero\"><p class=\"wl-eyebrow\">" + esc(st ? st.regionName : "Up next") + "</p>" +
+        "<button type=\"button\" class=\"primary wl-cta\" id=\"hm-next\" data-testid=\"session-next-step\">Next: " + esc(next.label) + ", " + next.minutes + " min</button>" +
+        (P.placement.status === "later" ? "<button type=\"button\" class=\"text-btn\" id=\"hm-place\">Play placement games</button>" : "") + "</section>";
+    } else primary = "";
+    const tracks = "<div class=\"home-tracks\">" +
+      "<button type=\"button\" class=\"wl-card track-card adv\" data-testid=\"home-adventure\" id=\"hm-adv\"><span class=\"tc-icon\">⛰</span><span class=\"wl-copy\"><strong>Adventure</strong><span>" + esc(st ? st.regionName : "Your journey") + "</span></span></button>" +
+      "<button type=\"button\" class=\"wl-card track-card train\" data-testid=\"home-train\" id=\"hm-train\"><span class=\"tc-icon\">♞</span><span class=\"wl-copy\"><strong>Train</strong><span>Lessons, openings, drills</span></span></button></div>";
+    let daily;
     if (!acc) {
-      renderWelcome(root, opts);
-      return;
-    }
-    const total = an.total || 0;
-    const looked = an.done || prog.analyzed || 0;
-    const streak = prog.streak || 0;
-    const strip = "<div class=\"today-strip\">" +
-      "<span class=\"strip-name\">" + esc(acc.username) + "</span>" +
-      "<span>" + (streak ? streak + "-day streak" : "Streak starts today") + "</span>" +
-      "<span>" + looked + (total && looked < total ? " of " + total : "") + " looked at</span></div>";
-    const analyzing = !!(an.running && looked < total);
-    const goal = 10;
-    const canStart = due.length > 0;
-    const pct = total ? Math.round((looked / total) * 100) : 0;
-    let hero;
-    if (analyzing && !canStart) {
-      hero = "<div class=\"today-hero idle\" id=\"td-hero\">" +
-        "<div class=\"hero-copy\"><strong>Looking at " + Math.max(looked, an.current || looked) + " of " + total + "</strong>" +
-        "<span>Finding mistakes in your games</span></div>" +
-        "<div class=\"thin-progress\" id=\"td-bar\"><span style=\"width:" + pct + "%\"></span></div></div>";
+      daily = "<button type=\"button\" class=\"wl-card daily\" id=\"hm-connect\"><span class=\"tc-icon\">10</span><span class=\"wl-copy\"><strong>Your daily 10</strong><span>Link Lichess, Chess.com or a PGN. Stays on this device.</span></span></button>";
     } else {
-      const sub = analyzing
-        ? ("Looking at " + looked + " of " + total)
-        : (canStart ? (todayDone + " of " + goal + " done") : "No due cards yet");
-      hero = "<button type=\"button\" class=\"today-hero" + (canStart ? "" : " idle") + "\" id=\"td-start\"" + (canStart ? "" : " disabled") + ">" +
-        ringSvg(todayDone, goal) +
-        "<div class=\"hero-copy\"><strong>Start today's " + goal + "</strong><span>" + esc(sub) + "</span></div></button>";
-      if (analyzing) {
-        hero += "<div class=\"thin-progress\" id=\"td-bar\"><span style=\"width:" + pct + "%\"></span></div>";
-      }
+      const total = an.total || 0, looked = an.done || prog.analyzed || 0;
+      const analyzing = !!(an.running && looked < total);
+      const sub = analyzing ? ("Looking at " + looked + " of " + total + " games") : (due.length ? (todayDone + " of 10 done") : "No cards due yet");
+      daily = "<button type=\"button\" class=\"wl-card daily\" id=\"hm-daily\"" + (due.length ? "" : " disabled") + ">" + ringSvg(todayDone, 10) +
+        "<span class=\"wl-copy\"><strong>Today's 10</strong><span>" + esc(sub) + "</span></span></button>";
+      const spot = spots[0];
+      if (spot) daily += "<button type=\"button\" class=\"wl-card today-spot\" data-id=\"" + esc(spot.persona) + "\"><span class=\"wl-copy\"><strong>Weak spot: " + esc(spot.when) + "</strong><span>" + esc(spot.record) + " · spar " + esc((window.PROFILES && window.PROFILES[spot.persona] && window.PROFILES[spot.persona].shortName) || spot.persona) + "</span></span></button>";
     }
-    const spot = spots[0];
-    const spotHtml = spot
-      ? "<button type=\"button\" class=\"today-spot\" data-id=\"" + esc(spot.persona) + "\">" +
-        "<span class=\"ws-when\">" + esc(spot.when) + " · " + esc(spot.record) +
-        " <span class=\"text-btn why-btn\" id=\"td-why\">Why?</span></span>" +
-        "<span class=\"ws-go\">Spar " + esc((window.PROFILES && window.PROFILES[spot.persona] && window.PROFILES[spot.persona].shortName) || spot.persona) + "</span></button>" +
-        "<p class=\"ws-why\" id=\"td-why-text\" hidden>From your linked games, grouped by ECO family.</p>"
-      : (analyzing
-        ? "<p class=\"ws-why\">Weak spots appear as more games are counted.</p>"
-        : "<p class=\"ws-why\">Not enough games in one family yet.</p>");
-    root.innerHTML =
-      "<div class=\"op-page today-page\">" +
-      strip + hero +
-      "<div class=\"today-spot-wrap\">" + spotHtml + "</div></div>";
-    if (window.AppChrome) { window.AppChrome.setTitle("Today"); window.AppChrome.setBack(null); }
-    const why = $("#td-why", root);
-    const whyText = $("#td-why-text", root);
-    if (why && whyText) why.addEventListener("click", function (ev) { ev.preventDefault(); ev.stopPropagation(); whyText.hidden = !whyText.hidden; });
-    const start = $("#td-start", root);
-    if (start && canStart) start.addEventListener("click", function () { startDueSession(opts, due); });
+    root.innerHTML = "<div class=\"op-page today-page home-page\">" + head + primary + tracks + "<h3 class=\"wl-section\">Today</h3><div class=\"wl-cards\">" + daily + "</div></div>";
+    if (window.AppChrome) { window.AppChrome.setTitle("Home"); window.AppChrome.setBack(null); }
+    const on = (id, fn) => { const el = $("#" + id, root); if (el) el.addEventListener("click", fn); };
+    on("hm-place", () => window.Adventure && window.Adventure.startPlacement());
+    on("hm-new", () => { window.Adventure.brandNew(); renderToday(root, opts); });
+    on("hm-later", () => { window.Adventure.playLater(); renderToday(root, opts); });
+    on("hm-next", () => next && next.go());
+    on("hm-adv", () => opts.onAdventure && opts.onAdventure());
+    on("hm-train", () => opts.onTrain && opts.onTrain());
+    on("hm-connect", () => showConnect(root, opts));
+    on("hm-daily", () => { if (due.length) startDueSession(opts, due); });
     const spotBtn = root.querySelector(".today-spot[data-id]");
-    if (spotBtn) spotBtn.addEventListener("click", function () {
-      if (opts.onSpar) opts.onSpar(spotBtn.getAttribute("data-id"));
-    });
+    if (spotBtn) spotBtn.addEventListener("click", function () { if (opts.onSpar) opts.onSpar(spotBtn.getAttribute("data-id")); });
   }
 
+  /* Train: direct access, no story. Lessons library, openings, drills, Think With Me, Rush, review. */
+  function reviewSub() {
+    const n = window.Lessons && window.Lessons.reviewDue ? window.Lessons.reviewDue() : 0;
+    return n ? n + " missed position" + (n > 1 ? "s" : "") + " due" : "Missed positions come back here";
+  }
   function renderTrain(root, opts) {
     opts = opts || {};
+    const OPEN = [["ponziani", "Ponziani", "White"], ["vienna", "Vienna", "White"], ["scotch", "Scotch", "White"], ["alapin", "Alapin vs Sicilian", "White"], ["caro", "Caro-Kann", "Black"], ["pirc", "Pirc", "Black"], ["rousseau", "Rousseau", "Black"]];
     root.innerHTML =
       "<div class=\"op-page train-hub\">" +
-      "<button type=\"button\" class=\"opening-card\" id=\"tr-think\"><strong>Think With Me</strong><span>Watch, then with help, then alone.</span></button>" +
-      "<button type=\"button\" class=\"opening-card\" id=\"tr-lessons\"><strong>Lessons</strong><span>Guided and Solo opening work.</span></button>" +
-      "<button type=\"button\" class=\"opening-card\" id=\"tr-drills\"><strong>Drills</strong><span>Clarity, plans, and pick-the-plan.</span></button>" +
-      "</div>";
+      "<h3 class=\"wl-section\">Openings</h3><div class=\"tr-open\">" + OPEN.map(function (o) {
+        return "<button type=\"button\" class=\"opening-card tr-op\" data-op=\"" + o[0] + "\"><strong>" + esc(o[1]) + "</strong><span>" + o[2] + "</span></button>";
+      }).join("") + "</div>" +
+      "<h3 class=\"wl-section\">Practice</h3><div class=\"tr-tools\">" +
+      "<button type=\"button\" class=\"drill-card\" id=\"tr-games\" data-testid=\"train-own-games\"><strong>Your games</strong><span id=\"tr-games-sub\">Drills from your own mistakes</span></button>" +
+      "<button type=\"button\" class=\"drill-card\" id=\"tr-review\" data-testid=\"train-review\"><strong>Review</strong><span id=\"tr-review-sub\">" + reviewSub() + "</span></button>" +
+      "<button type=\"button\" class=\"drill-card\" id=\"tr-think\"><strong>Think With Me</strong><span>One position, out loud</span></button>" +
+      "<button type=\"button\" class=\"drill-card\" id=\"tr-rush\" data-testid=\"rush-open\"><strong>Rush</strong><span>3 minutes, 3 strikes</span></button>" +
+      "<button type=\"button\" class=\"drill-card\" id=\"tr-drills\"><strong>Drills</strong><span>Plans and clarity</span></button>" +
+      "<button type=\"button\" class=\"drill-card\" id=\"tr-lessons\"><strong>All openings</strong><span>Guided and Solo</span></button>" +
+      (window.Packs ? window.Packs.list().filter(function (p) { return p.kind === "weekly-puzzles"; }).slice(0, 1).map(function (p) {
+        return "<button type=\"button\" class=\"drill-card\" data-pack=\"" + esc(p.id) + "\" data-testid=\"pack-card\"><strong>" + esc(p.title) + "</strong><span>" + p.items + " positions</span></button>";
+      }).join("") : "") + "</div>" +
+      "<h3 class=\"wl-section\">Lessons</h3><div id=\"tr-lib\"></div></div>";
     if (window.AppChrome) { window.AppChrome.setTitle("Train"); window.AppChrome.setBack(null); }
+    root.querySelectorAll("[data-op]").forEach(function (b) { b.addEventListener("click", function () { if (opts.onOpening) opts.onOpening(b.getAttribute("data-op")); }); });
     $("#tr-think", root).addEventListener("click", function () { if (opts.onThink) opts.onThink(); });
     $("#tr-lessons", root).addEventListener("click", function () { if (opts.onLessons) opts.onLessons(); });
     $("#tr-drills", root).addEventListener("click", function () { if (opts.onDrills) opts.onDrills(); });
+    $("#tr-rush", root).addEventListener("click", function () { if (window.Rush) window.Rush.open(); });
+    $("#tr-review", root).addEventListener("click", function () {
+      if (window.Lessons && window.Lessons.startReview()) return;
+      $("#tr-review-sub", root).textContent = "Nothing due. Lesson misses land here.";
+    });
+    let ownDue = [], ownAcc = null;
+    (async function () {
+      try {
+        ownAcc = window.SCAccount ? await window.SCAccount.getAccount() : null;
+        const cards = window.SCDB ? ((await window.SCDB.all("cards")) || []) : [];
+        ownDue = window.SCFSRS ? window.SCFSRS.due(cards) : [];
+        const sub = $("#tr-games-sub", root);
+        if (sub) sub.textContent = !ownAcc ? "Link an account to drill your games" : ownDue.length ? ownDue.length + " positions due" : "Nothing due yet";
+      } catch (e) {}
+    })();
+    $("#tr-games", root).addEventListener("click", function () {
+      if (!ownAcc) return showConnect(root, Object.assign({}, opts, { onDone: opts.onDone, onBack: opts.onDone }));
+      if (ownDue.length) return startDueSession(opts, ownDue);
+      $("#tr-games-sub", root).textContent = "Nothing due. Play a game, then check back.";
+    });
+    root.querySelectorAll("[data-pack]").forEach(function (b) { b.addEventListener("click", function () { window.Packs.start(b.getAttribute("data-pack")); }); });
+    if (window.Lessons) window.Lessons.renderHub($("#tr-lib", root));
   }
 
   async function fillSettings(host, opts) {
