@@ -13,7 +13,7 @@
   state.packs = state.packs || {}; state.checks = state.checks || {};
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} };
   const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
-  const APP = () => (window.APP_VERSION || "1.6.0");
+  const APP = () => (window.APP_VERSION || "1.6.1");
   const cmpVer = (a, b) => { const x = String(a).split(".").map(Number), y = String(b).split(".").map(Number); for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); } return 0; };
 
   async function verifySig(pubB64, payload, sigB64) {

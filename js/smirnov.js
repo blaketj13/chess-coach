@@ -8,11 +8,11 @@
      evaluate first; checks-captures-threats; opponent's best reply;
      least-active piece; go forward and create threats; anti-blunder check. */
   const ROUTINE = [
-    { id: "evaluate", title: "What's going on?", prompt: "Look at material, king safety, piece activity, and any threats. Don't start calculating until you know the story of the position." },
-    { id: "intent", title: "What did his last move want?", prompt: "Name the idea behind his last move. Is anything of yours now under fire on your side of the board?" },
-    { id: "forcing", title: "Checks, captures, threats", prompt: "Scan forcing moves first — checks, captures, and real threats. They're the strongest ideas and the easiest to calculate." },
-    { id: "worst", title: "Which is your worst piece?", prompt: "If nothing is forcing, find your most passive piece and improve it. When every piece is working, start looking toward his side of the board." },
-    { id: "candidate", title: "Pick a move, then try to break it", prompt: "Choose a candidate, then look for his most aggressive reply (a check, capture, or threat). If that reply holds up, the move isn't safe." }
+    { id: "evaluate", title: "What's going on?", prompt: "Look at material, king safety, activity, and threats before you calculate." },
+    { id: "intent", title: "What did his last move want?", prompt: "Name the idea. Is anything of yours now under fire?" },
+    { id: "forcing", title: "Checks, captures, threats", prompt: "Scan forcing moves first — checks, captures, and real threats." },
+    { id: "worst", title: "Which is your worst piece?", prompt: "If nothing is forcing, improve your most passive piece." },
+    { id: "candidate", title: "Pick a move, then try to break it", prompt: "Check his most aggressive reply. If it holds, the move isn't safe." }
   ];
 
   /* Attacking principles paraphrased from his public "Top 10 Attacking Principles"

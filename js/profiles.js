@@ -76,6 +76,27 @@ window.PROFILES = {
   }
 };
 
+// 1.6.1: a fifth style so every rival plays differently.
+window.PROFILES["trap-setter"] = {
+  id: "trap-setter",
+  name: "The Trap-Setter",
+  shortName: "Trap-Setter",
+  rating: 1200,
+  ratingLabel: "~1150–1300",
+  elo: 1200,
+  skill: 7,
+  style: "tricky",
+  blurb: "Offbeat lines with early tricks: Two Knights, Stafford and Englund ideas. Among good moves, prefers checks, captures and threats.",
+  setups: {
+    black: [
+      { vs: "1.e4 e5 with an early trick", plan: "Before every capture, ask what it leaves loose. Develop and castle; most traps punish greed." }
+    ],
+    white: [
+      { vs: "An odd gambit reply", plan: "Decline politely or take with care. Check every check before you grab material." }
+    ]
+  }
+};
+
 window.COACH_PRINCIPLES = [
   "Develop a knight or bishop, then castle, before you start an attack.",
   "Before you move, check: what did he just threaten, and is anything of yours hanging?",

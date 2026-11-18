@@ -28,11 +28,18 @@
     { id: "weekly-sets", tier: "pro", label: "Weekly puzzle sets" },
     { id: "journey-card", tier: "pro", label: "Shareable journey card" },
     { id: "badges-unlimited", tier: "pro", label: "Unlimited linked-game badges" },
-    { id: "weekly-recap", tier: "pro", label: "Weekly recap" }
+    { id: "weekly-recap", tier: "pro", label: "Weekly recap" },
+    // 1.6.1 drills: a daily taste is free, unlimited is Pro (still all unlocked).
+    { id: "calc-daily", tier: "free", label: "One calculation set a day" },
+    { id: "calc-unlimited", tier: "pro", label: "Unlimited calculation and visualization drills" },
+    { id: "clock-daily", tier: "free", label: "One clock drill a day" },
+    { id: "clock-unlimited", tier: "pro", label: "Unlimited clock drills" }
   ];
   // Path order. Placeholder regions (no content yet) are skipped when counting.
-  const REGION_ORDER = ["village", "cliffs", "tower", "forest", "crossroads", "peaks"];
-  const PLACEHOLDER = { crossroads: true };
+  // 1.6.1: the Opening Crossroads is an open side region (always free, any rating); the Citadel follows the Peaks.
+  const REGION_ORDER = ["village", "cliffs", "tower", "forest", "peaks", "citadel"];
+  const PLACEHOLDER = {};
+  const OPEN = { crossroads: "free" };
   const STORE_KEY = "sc.entitlement";
 
   function plan() {
@@ -48,6 +55,7 @@
     const i = Math.max(0, real.indexOf(entry || startRegion()));
     const out = {};
     real.forEach((r, j) => { out[r] = j < i ? "passed" : j <= i + 1 ? "free" : "pro"; });
+    Object.keys(OPEN).forEach((r) => { out[r] = OPEN[r]; });
     return out;
   }
   function freeRegions(entry) { const t = regionTiers(entry); return Object.keys(t).filter((r) => t[r] === "free"); }

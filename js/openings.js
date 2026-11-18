@@ -201,7 +201,7 @@
               opening: o,
               chapter: ch,
               next: at.move,
-              text: (ch.mnemonic ? ch.mnemonic + " " : "") + (at.move.idea || "Stay in the " + o.name + " plan.")
+              text: this.clipWords((ch.mnemonic ? ch.mnemonic + " " : "") + (at.move.idea || "Stay in the " + o.name + " plan."), 25)
             };
           }
         });
@@ -219,6 +219,16 @@
         });
       }
       return best;
+    },
+
+
+    clipWords(s, n) {
+      const w = String(s || "").replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+      if (w.length <= n) return w.join(" ");
+      const hang = /^(for|to|of|and|or|a|an|the|his|her|its|if|then|with|by|on|in|at|from|vs|vs\.|:)$/i;
+      const cut = w.slice(0, n);
+      while (cut.length > 3 && hang.test(cut[cut.length - 1])) cut.pop();
+      return cut.join(" ").replace(/[.,;:]+$/, "") + ".";
     },
 
     leftBookNote(uciHistory, playAs) {
@@ -241,9 +251,12 @@
       });
       if (inAny) return null;
       if (last) {
-        return {
-          text: "He's left the " + last.opening.name + " lines you studied. Stick to the ideas: " + ((last.chapter && last.chapter.mnemonic) || "develop, castle, and keep the plan.")
-        };
+        const head = "He's left the " + last.opening.name + " lines you studied.";
+        const idea = (last.chapter && last.chapter.mnemonic) || "develop, castle, and keep the plan.";
+        const used = head.trim().split(/\s+/).filter(Boolean).length;
+        const room = 25 - used;
+        const tail = room >= 6 ? this.clipWords("Stick to the ideas: " + idea, room) : "Stick to the plan.";
+        return { text: head + " " + tail };
       }
       return null;
     }

@@ -4,7 +4,7 @@
   const MIN_FAMILY_GAMES = 15;
   const FALLBACK_FAMILY_GAMES = 5;
   const MISTAKE_CP = 150;
-  const UA = "SparringCoach/1.6.0 (educational chess trainer; +https://blaketj13.github.io/chess-coach)";
+  const UA = "SparringCoach/1.6.1 (educational chess trainer; +https://blaketj13.github.io/chess-coach)";
   const listeners = [];
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

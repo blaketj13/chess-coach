@@ -1,5 +1,5 @@
 (function () {
-  const APP_VERSION = "1.6.0";
+  const APP_VERSION = "1.6.1";
   window.APP_VERSION = APP_VERSION;
   window.APP_VERSION = APP_VERSION;
 
@@ -62,7 +62,9 @@
   }
   function setPhase() {
     const el = $("#phase-badge");
-    if (el && window.Coach) el.textContent = window.Coach.gamePhase(state.chess);
+    if (el && window.Coach) {
+      try { el.textContent = window.Coach.gamePhase(state.chess); } catch (e) { el.textContent = ""; }
+    }
   }
   function setLineBadge(text) {
     const el = $("#line-badge");
@@ -146,7 +148,7 @@
     if (window.SCAccount && window.SCAccount.pauseAnalysis) window.SCAccount.pauseAnalysis();
     try {
       // Humanlike strength by rating (js/strength.js): sampling + plausible misses below 1500, UCI_Elo above. No random blunders.
-      return await window.Strength.pick(state.engine, fen, state.bot ? state.bot.rating : p.elo);
+      return await window.Strength.pick(state.engine, fen, state.bot ? state.bot.rating : p.elo, p.style);
     } finally {
       if (window.SCAccount && window.SCAccount.resumeAnalysis) window.SCAccount.resumeAnalysis(state.engine);
     }
@@ -281,18 +283,20 @@
     window.board.setPosition(state.chess.fen(), { from: mv.from, to: mv.to });
     window.board.setHighlights([]);
     if (window.board.setArrows) window.board.setArrows([]);
-    if (window.Feel) window.Feel.moved(mv, state.chess);
+    if (window.Feel) { try { window.Feel.moved(mv, state.chess); } catch (e) { console.warn(e); } }
     else if (window.Sound) { if (mv.captured) window.Sound.capture(); else window.Sound.move(); }
     setPhase();
     return mv;
   }
 
   function gameEnded() {
-    if (state.chess.in_checkmate()) return state.chess.turn() === blakeColor() ? "loss" : "win";
-    if (state.chess.in_stalemate()) return "draw";
-    if (state.chess.in_threefold_repetition()) return "draw";
-    if (state.chess.insufficient_material()) return "draw";
-    if (state.chess.in_draw()) return "draw";
+    try {
+      if (state.chess.in_checkmate()) return state.chess.turn() === blakeColor() ? "loss" : "win";
+      if (state.chess.in_stalemate()) return "draw";
+      if (state.chess.in_threefold_repetition()) return "draw";
+      if (state.chess.insufficient_material()) return "draw";
+      if (state.chess.in_draw()) return "draw";
+    } catch (e) { console.warn("gameEnded failed", e); }
     return null;
   }
 
@@ -374,7 +378,7 @@
         pushCoach("info", "Back to that moment. " + (m.nudge || "Look at checks, captures, and threats first. Then try to break your own candidate before you play it."));
       });
     });
-    box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (window.BoardView) window.BoardView.keep(box);
   }
 
   function collectHighlights(list) {
@@ -387,7 +391,8 @@
     const hi = [];
     const arrows = [];
 
-    const info = window.Coach.threatsFromLastMove(state.chess, last, blakeColor());
+    let info = { messages: [], highlights: [], arrows: [] };
+    try { info = window.Coach.threatsFromLastMove(state.chess, last, blakeColor()) || info; } catch (e) { console.warn("threat cues failed", e); }
     hi.push.apply(hi, info.highlights);
     if (info.arrows) arrows.push.apply(arrows, info.arrows);
     if (info.messages.length) {
@@ -398,7 +403,8 @@
     }
 
     if (state.mode === "hints") {
-      const takes = window.Coach.missedCaptures(state.chess, blakeColor());
+      let takes = [];
+      try { takes = window.Coach.missedCaptures(state.chess, blakeColor()) || []; } catch (e) { console.warn("missed-capture cue failed", e); }
       for (const t of takes) {
         pushCoach("tip", t.message);
         hi.push({ square: t.square, kind: "take" });
@@ -417,16 +423,18 @@
 
     /* Fianchetto plans — especially vs White's 1.g3 / 1.b4. */
     if (state.mode !== "off" && window.Fianchetto && window.Fianchetto.detect) {
-      const det = window.Fianchetto.detect(state.chess, blakeColor(), last);
-      (det.cues || []).forEach((c) => {
-        if (c.id === state.lastCueId && c.kind !== "warn") return;
-        if (state.mode === "warn" && c.kind !== "warn") return;
-        pushCoach(c.kind === "warn" ? "warn" : "principle", c.text);
-        if (c.highlights) hi.push.apply(hi, c.highlights);
-        if (c.arrows) arrows.push.apply(arrows, c.arrows);
-        state.lastCueId = c.id;
-        state.log.push({ type: "fianchetto", id: c.id, text: c.text, ply: state.uciHistory.length, fen: state.chess.fen(), severe: c.kind === "warn" });
-      });
+      try {
+        const det = window.Fianchetto.detect(state.chess, blakeColor(), last) || { cues: [] };
+        (det.cues || []).forEach((c) => {
+          if (c.id === state.lastCueId && c.kind !== "warn") return;
+          if (state.mode === "warn" && c.kind !== "warn") return;
+          pushCoach(c.kind === "warn" ? "warn" : "principle", c.text);
+          if (c.highlights) hi.push.apply(hi, c.highlights);
+          if (c.arrows) arrows.push.apply(arrows, c.arrows);
+          state.lastCueId = c.id;
+          state.log.push({ type: "fianchetto", id: c.id, text: c.text, ply: state.uciHistory.length, fen: state.chess.fen(), severe: c.kind === "warn" });
+        });
+      } catch (e) { console.warn("fianchetto cue failed", e); }
     }
 
     /* A single general thinking cue if nothing else fired in hints mode. */
@@ -475,7 +483,7 @@
     state.uciHistory.push(uci);
     state.history.push(mv);
     window.board.setPosition(state.chess.fen(), { from: mv.from, to: mv.to });
-    if (window.Feel) window.Feel.moved(mv, state.chess);
+    if (window.Feel) { try { window.Feel.moved(mv, state.chess); } catch (e) { console.warn(e); } }
     else if (window.Sound) { if (mv.captured) window.Sound.capture(); else window.Sound.move(); }
     setPhase();
     maybeLeaveTheory();

@@ -92,5 +92,5 @@
     const n = $("#re-next", v); if (n) n.addEventListener("click", () => next.go());
     $("#re-again", v).addEventListener("click", overlayStart);
   }
-  window.Rush = { open: overlayStart, begin, end, load };
+  window.Rush = { open: overlayStart, begin, end, load, current() { return run && run.p ? { fen: run.p.fen, answer: run.p.line[run.p.ply], solved: run.solved } : null; } };
 })();

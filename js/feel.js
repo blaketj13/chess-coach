@@ -61,8 +61,9 @@
   function flash(sq, cls, ms) { if (reducedMotion()) return; requestAnimationFrame(() => { const e = sqEl(sq); if (!e) return; e.classList.add(cls); setTimeout(() => e.classList.remove(cls), ms || 500); }); }
   function moved(m, chess) {
     if (!m) return;
-    const mate = chess && chess.in_checkmate && chess.in_checkmate();
-    const check = chess && chess.in_check && chess.in_check();
+    let mate = false, check = false;
+    try { mate = !!(chess && chess.in_checkmate && chess.in_checkmate()); } catch (e) {}
+    try { check = !!(chess && chess.in_check && chess.in_check()); } catch (e) {}
     sound(m.captured ? "capture" : check ? "check" : "move");
     if (m.captured) setTimeout(() => flash(m.to, "fx-pop", 380), 160);
     if (check) {

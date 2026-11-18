@@ -90,6 +90,7 @@
       this._onMove = this._onMove.bind(this);
       this._onUp = this._onUp.bind(this);
       this.root.classList.add("cb-host");
+      this.root.setAttribute("data-testid", "board"); // 1.6.1: stable hook for "board stays in view"
       this.root.addEventListener("pointerdown", this._onDown);
       this.root.addEventListener("pointermove", this._onMove);
       this.root.addEventListener("pointerup", this._onUp);

@@ -1,4 +1,4 @@
-/* 1.6.0 lesson engine. Beats teach, practice repeats, the last stage is a mini-boss.
+/* 1.6.0/1.6.1 lesson engine. Beats teach, practice repeats, the last stage is a mini-boss.
    You move to answer; taps continue; no Next buttons. Accepted moves are the engine-verified
    set built by tools/lessons/build.mjs, so equal alternatives always count. */
 (function () {
@@ -103,8 +103,8 @@
     el.setAttribute("data-testid", kind === "reveal" ? "lesson-reveal" : "lesson-feedback");
     if (kind === "reveal") el.addEventListener("click", () => cur && cur.onReveal && cur.onReveal());
     view().appendChild(el);
-    // Keep the panel's action above the tab bar on short phones.
-    requestAnimationFrame(() => requestAnimationFrame(() => { try { el.scrollIntoView({ block: "nearest" }); } catch (e) {} }));
+    // Fit the panel under the board; the board itself never scrolls away (js/boardview.js).
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (window.BoardView) window.BoardView.keep(el); }));
     return el;
   }
   function expected() {
@@ -170,6 +170,7 @@
   }
   function goalMet(goal, res) {
     const m = res.m;
+    if (goal.toAny) return goal.toAny.includes(m.to) && (!goal.piece || m.piece === goal.piece);
     if (goal.to) return m.to === goal.to && (!goal.piece || m.piece === goal.piece);
     if (goal.capture) return m.to === goal.capture && !!m.captured;
     if (goal.castle) return /[kq]/.test(m.flags);
@@ -180,26 +181,59 @@
   }
 
   // ---- why + alternative -----------------------------------------------------
+  // Keep why-not copy under the 25-word style cap, and never praise a lead on a miss.
+  function fitWords(s, n) {
+    const w = String(s || "").trim().split(/\s+/).filter(Boolean);
+    if (w.length <= n) return w.join(" ");
+    return w.slice(0, n).join(" ").replace(/[.,;:]+$/, "") + ".";
+  }
   function whyLocal(s, uci, res, ex) {
-    if (s.why && s.why[uci] && cur.ply === 0) {
-      // Build-time note "Nd4? Nxd4 is the answer. You're down about 5.8 pawns." reads better as a consequence.
-      return s.why[uci].replace(/^(\S+)\? (\S+) is the answer\./, "$1 runs into $2.").replace(/You're (down|up) about/, "You'd be $1 about");
-    }
+    const played = sanOf(cur.fen, uci) || "That";
+    const better = sanOf(cur.fen, ex.want);
     const c = res.c;
-    if (c.in_stalemate()) return "Stalemate: they have no moves and no check. That's a draw.";
-    if (s.goal && s.goal.to) return "That lands on " + res.m.to + ". The mark is " + s.goal.to + ".";
-    if (s.goal && s.goal.mate && c.in_check()) return "Check, but they can escape. Count the king's exits first.";
-    if (s.goal && s.goal.capture) return "Look again: something can be taken on " + s.goal.capture + ".";
-    // Did the move leave the moved piece loose?
-    try {
-      const hung = window.Coach && window.Coach.hangingPieces ? window.Coach.hangingPieces(c, res.m.color) : [];
-      const h = hung.find((x) => x.square === res.m.to) || hung.sort((a, b) => b.value - a.value)[0];
-      if (h && h.value >= 3) return "That leaves your " + (h.name || NAME[h.piece] || "piece") + " on " + h.square + " loose.";
-    } catch (e) {}
-    const best = apply(cur.fen, ex.want);
-    if (best && best.c.in_checkmate()) return "There was mate here. Check every check first.";
-    if (best && best.m.captured && !res.m.captured) return "You left material on the board. Something was free.";
-    return "Playable, but it lets them off the hook.";
+    let line = "";
+    if (c.in_stalemate()) line = "Stalemate: they have no moves and no check. That's a draw.";
+    else if (s.goal && s.goal.to && res.m.to !== s.goal.to)
+      line = played + " misses the marked square. " + better + " goes to " + s.goal.to + ".";
+    else if (s.goal && s.goal.toAny && !(s.goal.toAny || []).includes(res.m.to))
+      line = played + " misses the mark. Aim for " + s.goal.toAny.join(" or ") + ".";
+    else if (s.goal && s.goal.castle) line = "Fine move, wrong job. Your king still needs a safe home.";
+    else if (s.goal && s.goal.mate && c.in_check()) line = "Check, but they can escape. Count the king's exits first.";
+    else if (s.goal && s.goal.mate) line = played + " is not mate. Look for a check they cannot escape.";
+    else if (s.goal && s.goal.capture && res.m.to !== s.goal.capture)
+      line = played + " leaves the free piece. Take the one on " + s.goal.capture + ".";
+    if (!line) {
+      try {
+        const hung = window.Coach && window.Coach.hangingPieces ? window.Coach.hangingPieces(c, res.m.color) : [];
+        const h = hung.find((x) => x.square === res.m.to) || hung.sort((a, b) => b.value - a.value)[0];
+        if (h && h.value >= 3) line = played + " leaves your " + (h.name || NAME[h.piece] || "piece") + " on " + h.square + " loose.";
+      } catch (e) {}
+    }
+    if (!line && s.why && s.why[uci] && cur.ply === 0) {
+      const raw = String(s.why[uci]);
+      const m = raw.match(/^(\S+)\? (\S+) is the answer\.\s*(.*)$/);
+      if (m) {
+        const reply = m[2], rest = m[3] || "";
+        if (/They mate|walks into mate/i.test(rest) || /#/.test(reply))
+          line = played + " walks into " + reply + ". That gets you mated.";
+        else if (/Mate in/i.test(rest))
+          line = played + " walks into " + reply + ". That gets you mated.";
+        else if (/You're down about/i.test(rest))
+          line = played + " runs into " + reply + ". That costs you material.";
+        else
+          line = played + " is slower than " + better + ". The better move does more here.";
+      } else if (!/You're up about/i.test(raw)) {
+        line = raw.replace(/You're (down) about/, "You'd be $1 about");
+      }
+    }
+    if (!line) {
+      const best = apply(cur.fen, ex.want);
+      if (best && best.c.in_checkmate()) line = played + " misses mate. " + better + " finishes it.";
+      else if (best && best.m.captured && !res.m.captured) line = played + " leaves material on the board. " + better + " takes the free piece.";
+      else if (best && best.c.in_check() && !c.in_check()) line = played + " doesn't check. " + better + " keeps the pressure on.";
+      else line = played + " lets them off the hook. " + better + " is the idea.";
+    }
+    return fitWords(line, 25);
   }
   function wrong(s, uci, res, ex) {
     cur.locked = true;
@@ -214,9 +248,11 @@
     const alts = (ex.accept || []).filter((u) => u !== ex.want).slice(0, 2).map((u) => sanOf(cur.fen, u));
     fb.innerHTML =
       "<p class=\"ls-fb-title\">Not quite.</p>" +
+      "<div class=\"ls-fb-body\">" +
       "<p data-testid=\"move-why\">" + esc(whyLocal(s, uci, res, ex)) + "</p>" +
       (s.h && cur.ply === 0 ? "<p class=\"ls-fb-hint\">Hint: " + esc(s.h) + "</p>" : "") +
-      "<p class=\"ls-alt\" data-testid=\"move-alternative\">Engine pick: <b>" + esc(better) + "</b>" + (alts.length ? " (also " + esc(alts.join(", ")) + ")" : "") + "</p>" +
+      "<p class=\"ls-alt\" data-testid=\"move-alternative\">Better: <b>" + esc(better) + "</b>" + (alts.length ? " (also " + esc(alts.join(", ")) + ")" : "") + "</p>" +
+      "</div>" +
       "<button type=\"button\" class=\"primary\" data-act=\"try\" id=\"ls-try\">Try again</button>";
     $("#ls-try").addEventListener("click", () => {
       fb.remove(); cur.locked = false;

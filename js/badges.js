@@ -8,7 +8,12 @@
     "castle-5": { name: "Safe king", line: "Castled in five games in a row." },
     "convert": { name: "Converted", line: "Went five points up and finished the job." },
     "clean-win": { name: "Clean win", line: "Won without ever dropping three points." },
-    "rush-20": { name: "Rush 20", line: "Twenty puzzles in one Rush." }
+    "rush-20": { name: "Rush 20", line: "Twenty puzzles in one Rush." },
+    // 1.6.1 drills: earned on the board too
+    "calc-clean": { name: "Clear sight", line: "A full calculation set without a miss." },
+    "blindfold": { name: "Blindfold", line: "Found the move with every piece hidden." },
+    "clock-10": { name: "Ten on the clock", line: "Ten solves in one Blitz drill." },
+    "clock-cool": { name: "Cool head", line: "Every position solved inside its think budget." }
   };
   function name(id) { return (DEFS[id] && DEFS[id].name) || id; }
   function material(c, color) { let s = 0; c.board().forEach((r) => r.forEach((p) => { if (p) s += (p.color === color ? 1 : -1) * VAL[p.type]; })); return s; }

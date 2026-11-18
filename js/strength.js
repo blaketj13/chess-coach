@@ -46,7 +46,17 @@
     } catch (e) { return false; }
   }
   /** Choose a bot move at a given rating. engine: StockfishEngine. Returns uci. */
-  async function pick(engine, fen, rating) {
+  /** Style bias among near-equal moves: "tricky" leans to checks, captures and threats (never past maxDrop). */
+  function styleWeight(chess, uci, style) {
+    if (style !== "tricky") return 1;
+    try {
+      const m = chess.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || "q" });
+      if (!m) return 1;
+      chess.undo();
+      return m.san.includes("+") ? 3 : m.captured ? 2 : 1;
+    } catch (e) { return 1; }
+  }
+  async function pick(engine, fen, rating, style) {
     const s = strength(rating);
     await engine.setStrength(s.limit ? s.elo : null, 20); // skill 20 resets any persona skill; UCI_Elo governs when limited
     const res = await engine.analyze(fen, { depth: s.depth || undefined, movetime: s.movetime, multipv: s.multipv });
@@ -61,7 +71,7 @@
       const human = pool.slice(1).filter((p) => natural(chess, p.pv[0]));
       if (human.length) return human[Math.floor(Math.random() * human.length)].pv[0];
     }
-    const w = pool.map((p) => Math.exp((scoreOf(p) - best) / s.temperature));
+    const w = pool.map((p) => Math.exp((scoreOf(p) - best) / s.temperature) * styleWeight(chess, p.pv[0], style));
     let t = Math.random() * w.reduce((a, b) => a + b, 0);
     for (let i = 0; i < pool.length; i++) { t -= w[i]; if (t <= 0) return pool[i].pv[0]; }
     return pool[0].pv[0];

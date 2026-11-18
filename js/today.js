@@ -228,6 +228,8 @@
       "<button type=\"button\" class=\"drill-card\" id=\"tr-review\" data-testid=\"train-review\"><strong>Review</strong><span id=\"tr-review-sub\">" + reviewSub() + "</span></button>" +
       "<button type=\"button\" class=\"drill-card\" id=\"tr-think\"><strong>Think With Me</strong><span>One position, out loud</span></button>" +
       "<button type=\"button\" class=\"drill-card\" id=\"tr-rush\" data-testid=\"rush-open\"><strong>Rush</strong><span>3 minutes, 3 strikes</span></button>" +
+      "<button type=\"button\" class=\"drill-card\" id=\"tr-calc\" data-testid=\"calc-open\"><strong>Calculation</strong><span>Count it, then see it blind</span></button>" +
+      "<button type=\"button\" class=\"drill-card\" id=\"tr-clock\" data-testid=\"clock-open\"><strong>Clock drills</strong><span>Blitz and think budgets</span></button>" +
       "<button type=\"button\" class=\"drill-card\" id=\"tr-drills\"><strong>Drills</strong><span>Plans and clarity</span></button>" +
       "<button type=\"button\" class=\"drill-card\" id=\"tr-lessons\"><strong>All openings</strong><span>Guided and Solo</span></button>" +
       (window.Packs ? window.Packs.list().filter(function (p) { return p.kind === "weekly-puzzles"; }).slice(0, 1).map(function (p) {
@@ -240,6 +242,8 @@
     $("#tr-lessons", root).addEventListener("click", function () { if (opts.onLessons) opts.onLessons(); });
     $("#tr-drills", root).addEventListener("click", function () { if (opts.onDrills) opts.onDrills(); });
     $("#tr-rush", root).addEventListener("click", function () { if (window.Rush) window.Rush.open(); });
+    $("#tr-calc", root).addEventListener("click", function () { if (window.Calc) window.Calc.open(); });
+    $("#tr-clock", root).addEventListener("click", function () { if (window.Clock) window.Clock.open(); });
     $("#tr-review", root).addEventListener("click", function () {
       if (window.Lessons && window.Lessons.startReview()) return;
       $("#tr-review-sub", root).textContent = "Nothing due. Lesson misses land here.";

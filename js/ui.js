@@ -254,6 +254,8 @@
   function showTab(name, extra) {
     if (name === "learn") name = "openings";
     if (name === "drills") name = "clarity";
+    const main = document.querySelector(".main");
+    if (main && !extra) main.scrollTop = 0;
     markTab(name);
     hideViews();
     document.querySelectorAll(".overlay.adv-ov, .overlay.feel-ov").forEach((x) => { if (!x.matches("[data-testid=placement-game]")) x.remove(); });
@@ -844,6 +846,8 @@
     if (which) which.addEventListener("click", () => startWhichLine(o));
     const cmp = $("#btn-compare", root);
     if (cmp) cmp.addEventListener("click", () => startCompare(o));
+    const main = document.querySelector(".main");
+    if (main) main.scrollTop = 0;
     const tp = $("#btn-to-plans", root);
     if (tp) tp.addEventListener("click", () => { UI.sub = "pirc-plans"; renderOpenings(); });
     $$("[data-ch]", root).forEach((btn) => {
