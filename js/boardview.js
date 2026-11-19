@@ -5,7 +5,7 @@
    - keep(panel) scrolls only as far as the board's top allows, then lets the panel scroll inside itself;
    - a watcher re-checks after any change in the main area (covers every view, old and new). */
 (function () {
-  const PANELS = ".ls-feedback, .ls-reveal, #drill-fb, #learn-fb, #c-fb, .pr-feedback, .pr-fb, .coach-feed, #coach-box, .th-fb, .rush-msg, #rush-msg, #clock-msg, .calc-reveal";
+  const PANELS = "#takeback-bar, .ls-feedback, .ls-reveal, #drill-fb, #learn-fb, #c-fb, .pr-feedback, .pr-fb, .coach-feed, #coach-box, .th-fb, .rush-msg, #rush-msg, #clock-msg, .calc-reveal";
   const main = () => document.querySelector(".main");
   function insets() {
     const cs = getComputedStyle(document.documentElement);
@@ -92,6 +92,7 @@
     const m = main(); if (!m) return;
     const h = m.clientHeight || window.innerHeight;
     document.documentElement.style.setProperty("--board-cap", Math.max(200, Math.round(h - 210)) + "px");
+    document.documentElement.style.setProperty("--main-h", Math.round(h) + "px"); // 1.6.2: mistake card sizing
   }
   let pending = 0;
   function schedule() {

@@ -308,6 +308,7 @@
       nudge: "",
       evalWords: phraseDrop(drop, matePlayed ? played.score : (mateBest && decision.warn ? 1 : 0)),
       bestSan: bestSans[0] || (best && best.san) || "",
+      bestMove: (best && best.move) || null,
       bestReason: "",
       highlights: [],
       arrows: [],

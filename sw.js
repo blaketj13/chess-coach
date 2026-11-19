@@ -1,6 +1,6 @@
 /* Cache runtime assets, including the unmodified Stockfish wasm, for offline and repeat loads.
    The engine files are stored as-is and never rewritten. */
-const CACHE = "sparring-coach-1.6.1";
+const CACHE = "sparring-coach-1.6.2";
 const PRECACHE = [
   "./",
   "./index.html",
@@ -28,9 +28,23 @@ const PRECACHE = [
   "./js/progress.js",
   "./js/strength.js",
   "./js/feel.js",
+  "./vendor/fonts/fraunces-display.woff2",
+  "./vendor/sfx/move.ogg",
+  "./vendor/sfx/capture.ogg",
+  "./vendor/sfx/check.ogg",
+  "./vendor/sfx/good.ogg",
+  "./vendor/sfx/ok.ogg",
+  "./vendor/sfx/miss.ogg",
+  "./vendor/sfx/tap.ogg",
+  "./vendor/sfx/combo.ogg",
+  "./vendor/sfx/level.ogg",
+  "./vendor/sfx/win.ogg",
+  "./vendor/sfx/badge.ogg",
+  "./vendor/sfx/boss.ogg",
   "./js/lessons.js",
   "./js/pack-key.js",
   "./js/packs.js",
+  "./js/result.js",
   "./js/adventure.js",
   "./js/rush.js",
   "./js/boardview.js",

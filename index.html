@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-board-theme="slate">
+<html lang="en" data-board-theme="nightfall">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <title>Sparring Coach 1.6.1</title>
+  <title>Sparring Coach 1.6.2</title>
   <link rel="stylesheet" href="styles.css" />
   <script>
     // Android draws edge to edge; the app hands over the bar sizes so nothing sits under them.
@@ -50,24 +50,37 @@
                 <span id="line-badge" class="chip quiet"></span>
               </div>
               <div id="board"></div>
+              <div class="combo-row" id="combo-row" data-testid="combo-meter" aria-label="Clean-move combo">
+                <span class="combo-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="combo-mult" id="combo-mult"></span>
+                <span class="game-xp" id="game-xp" data-testid="game-xp"></span>
+              </div>
               <div id="wes-toast" class="wes-toast" hidden>
                 <span class="wes-av" aria-hidden="true">W</span>
                 <span id="wes-toast-text"></span>
               </div>
               <div class="play-bar">
                 <div id="status">Your move</div>
-                <button type="button" id="btn-resign" class="ghost tiny">Resign</button>
+                <button type="button" id="btn-play-mute" class="icon-chip" data-testid="play-mute" aria-pressed="false" aria-label="Sound on. Tap to mute"></button>
+                <button type="button" id="btn-resign" class="ghost tiny" data-testid="resign">Resign</button>
               </div>
-              <div id="takeback-bar" hidden>
+              <div id="takeback-bar" hidden data-testid="mistake-moment">
+                <div id="mm-kicker" class="mm-kicker"></div>
                 <div id="takeback-text" class="tb-why"></div>
+                <div class="tb-actions">
+                  <button type="button" class="btn primary" id="btn-takeback">Take back</button>
+                  <button type="button" class="btn" id="btn-show-best">Show better</button>
+                  <button type="button" class="btn" id="btn-keep">Keep playing</button>
+                </div>
+                <div id="best-reveal" class="tb-best" hidden></div>
+                <div class="mm-compare">
+                  <div class="mm-box played"><small>You played</small><b id="mm-played"></b></div>
+                  <div class="mm-box better hidden-best" id="mm-better-box"><small>Better</small><b id="mm-better">?</b></div>
+                </div>
+                <div id="mm-quip" class="mm-quip" hidden></div>
                 <div id="takeback-line" class="tb-line"></div>
                 <div id="takeback-nudge" class="tb-nudge"></div>
-                <div id="best-reveal" class="tb-best" hidden></div>
-                <div class="tb-actions">
-                  <button type="button" class="btn" id="btn-show-best">Show best</button>
-                  <button type="button" class="btn" id="btn-takeback">Take back</button>
-                  <button type="button" class="btn" id="btn-keep">Keep</button>
-                </div>
+                <div class="mm-free">Takebacks are free. No XP lost; the combo just resets.</div>
               </div>
             </div>
             <div id="side">
@@ -149,7 +162,8 @@
         </label>
         <label>Board
           <select id="theme-select">
-            <option value="slate" selected>Slate &amp; Sand</option>
+            <option value="nightfall" selected>Nightfall</option>
+            <option value="slate">Slate &amp; Sand</option>
             <option value="dusk">Dusk</option>
             <option value="ink">Ink</option>
             <option value="walnut">Walnut</option>
@@ -160,6 +174,7 @@
         </div>
         <div class="toolbar-actions feel-toggles">
           <button type="button" class="ghost" data-testid="mute" id="btn-mute" aria-pressed="false">Sound on</button>
+          <button type="button" class="ghost" data-testid="haptics" id="btn-haptics" aria-pressed="true">Haptics: on</button>
           <button type="button" class="ghost" data-testid="reduced-motion" id="btn-motion" aria-pressed="false">Motion on</button>
         </div>
         <div class="char-edit" data-testid="character-edit">
@@ -170,7 +185,7 @@
       </div>
       <details id="about-panel" class="about-panel">
         <summary>About</summary>
-        <p><span class="app-ver">Sparring Coach 1.6.1.</span> An offline opening and sparring coach.</p>
+        <p><span class="app-ver">Sparring Coach 1.6.2.</span> An offline opening and sparring coach.</p>
         <p class="credit">© 2026 SpotVibe LLC. All rights reserved. The app’s own code is proprietary to SpotVibe LLC and is not open source.</p>
         <p class="credit">Style-mimic bots play from books built from the public-domain Lichess openings dataset (CC0), then Stockfish at a similar strength. Eval numbers stay hidden during the game. No account needed.</p>
         <p class="credit">Attacking ideas and the thinking routine are inspired by GM Igor Smirnov’s public teaching (Remote Chess Academy). Not affiliated with or endorsed by him or RCA.</p>
@@ -183,6 +198,8 @@
         <p class="credit"><strong>lichess-org/chess-openings</strong> ECO data is CC0 1.0. <a href="https://github.com/lichess-org/chess-openings" target="_blank" rel="noopener">Dataset</a>. <a href="licenses/LICHESS-OPENINGS-CC0.txt">CC0 notice</a>.</p>
         <p class="credit"><strong>chess.js</strong> 0.12.1 is © Jeff Hlywa, BSD-2-Clause. <a href="licenses/CHESSJS-BSD-2.txt">License</a>.</p>
         <p class="credit"><strong>Lichess puzzle database</strong> positions used in lessons, Rush and packs are CC0 1.0. <a href="https://database.lichess.org/#puzzles" target="_blank" rel="noopener">Source</a>.</p>
+        <p class="credit"><strong>Fraunces</strong> display font © 2018 The Fraunces Project Authors, SIL Open Font License 1.1. <a href="licenses/FRAUNCES-OFL-1.1.txt">License</a>.</p>
+        <p class="credit"><strong>Sound effects</strong> from Kenney’s Impact Sounds and Interface Sounds (kenney.nl), CC0 1.0. <a href="licenses/KENNEY-CC0.txt">CC0 notice</a>.</p>
         <p class="credit"><strong>@noble/ed25519</strong> 2.3.0 is © Paul Miller, MIT. <a href="licenses/NOBLE-ED25519-MIT.txt">License</a>.</p>
       </details>
     </div>
@@ -212,6 +229,7 @@
   <script src="js/lessons.js"></script>
   <script src="js/pack-key.js"></script>
   <script src="js/packs.js"></script>
+  <script src="js/result.js"></script>
   <script src="js/adventure.js"></script>
   <script src="js/rush.js"></script>
   <script src="js/boardview.js"></script>

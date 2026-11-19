@@ -93,6 +93,14 @@
   // Level n needs 100*n XP beyond the previous level (100, 200, 300 ...).
   function levelOf(xp) { let lvl = 1, need = 100, left = xp; while (left >= need) { left -= need; lvl++; need = 100 * lvl; } return { level: lvl, into: left, need }; }
   function addXp(base, opts) {
+    // 1.6.2: game XP (Play, rivals, placement) keeps the drill combo untouched and has no multiplier.
+    if (opts && opts.keepCombo) {
+      const before0 = levelOf(S.xp).level, gain0 = Math.max(0, Math.round(base));
+      S.xp += gain0;
+      const after0 = levelOf(S.xp).level;
+      touchDay(0.5); save();
+      return { gain: gain0, mult: 1, combo: S.combo || 0, levelUp: after0 > before0 ? after0 : null };
+    }
     const clean = opts && opts.noHint;
     S.combo = clean ? (S.combo || 0) + 1 : 0;
     const mult = clean ? Math.min(3, 1 + Math.floor(S.combo / 3) * 0.5) : 1;

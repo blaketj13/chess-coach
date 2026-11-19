@@ -1,5 +1,5 @@
 (function () {
-  const APP_VERSION = "1.6.1";
+  const APP_VERSION = "1.6.2";
   window.APP_VERSION = APP_VERSION;
   window.APP_VERSION = APP_VERSION;
 
@@ -34,7 +34,52 @@
     bookHits: 0,
     bookPlies: 0,
     lastCueId: null,
+    // 1.6.2 reward loop: clean moves (no takeback offered), the live combo and its best run.
+    game: { clean: 0, combo: 0, bestCombo: 0, xpLive: 0 },
   };
+
+  // ---- 1.6.2 reward loop helpers -------------------------------------------------------
+  const QUIPS = ["I'll take that, thanks.", "Bold. Wrong, but bold.", "Was that the plan?", "Generous of you."];
+  function resetGameFeel() {
+    state.game = { clean: 0, combo: 0, bestCombo: 0, xpLive: 0 };
+    if (window.board && window.board.setMarks) window.board.setMarks([]);
+    renderCombo();
+  }
+  function renderCombo() {
+    const g = state.game, row = $("#combo-row");
+    if (!row) return;
+    const lit = Math.min(5, g.combo);
+    row.querySelectorAll(".combo-pips i").forEach((el, i) => el.classList.toggle("on", i < lit));
+    const mult = $("#combo-mult"), xp = $("#game-xp");
+    if (mult) mult.textContent = g.combo >= 2 ? "Clean ×" + g.combo : "";
+    if (xp) xp.textContent = g.xpLive ? "+" + g.xpLive + " XP" : "";
+    row.setAttribute("data-combo", String(g.combo));
+  }
+  /** Move-quality label: a word or symbol plus a tone, so it never relies on color alone. */
+  function qualityOf(review, chessAfter) {
+    let mate = false;
+    try { mate = chessAfter.in_checkmate(); } catch (e) {}
+    if (mate) return { tone: "mate", label: "#" };
+    if (!review || review.reason === undefined) return null;
+    if (review.warn) return (review.drop || 0) >= 300 ? { tone: "blunder", label: "??" } : { tone: "mistake", label: "?" };
+    if ((review.drop || 0) <= 15) return { tone: "best", label: "Best ✓" };
+    return { tone: "good", label: "Good" };
+  }
+  function markMove(mv, q, xp) {
+    if (!window.board || !window.board.setMarks || !mv) return;
+    const marks = [];
+    if (q) marks.push({ square: mv.to, kind: "chip", tone: q.tone, label: q.label });
+    if (xp && !(window.Feel && window.Feel.reducedMotion())) marks.push({ square: mv.to, kind: "xp", label: "+" + xp + " XP" });
+    window.board.setMarks(marks);
+    if (xp) setTimeout(() => {
+      if (!window.board || !window.board.marks) return;
+      window.board.setMarks(window.board.marks.filter((m) => m.kind !== "xp"));
+    }, 1150);
+  }
+  function setResignVisible(v) {
+    const r = $("#btn-resign");
+    if (r) r.hidden = !v;
+  }
 
   function profile() {
     const base = window.PROFILES[state.opponentId] || window.PROFILES["solid-defender"];
@@ -301,8 +346,15 @@
   }
 
   function endGame(result, reason) {
+    if (state.over) return;
     state.over = true;
     state.thinking = false;
+    state.pending = null;
+    setResignVisible(false);
+    hideTakeback();
+    let mated = false;
+    try { mated = state.chess.in_checkmate(); } catch (e) {}
+    const xpInfo = window.GameResult ? window.GameResult.award({ result: result, clean: state.game.clean, mate: mated, plies: state.history.length + (state.plyBase || 0), bestCombo: state.game.bestCombo }) : null;
     // Badges come from real games only.
     if (window.Badges && state.history.length >= 6) {
       try { window.Badges.fromGame(state.history, blakeColor(), result, { fen: state.startFen || undefined }); } catch (e) { console.warn(e); }
@@ -312,12 +364,15 @@
       state.onEnd = null; state.bot = null;
       status(reason || "Game over");
       if (window.Progress) window.Progress.touchDay(4);
-      setTimeout(() => { try { onEnd(result); } catch (e) { console.error(e); } }, 600);
+      setTimeout(() => { try { onEnd(result, xpInfo); } catch (e) { console.error(e); } }, mated ? 1100 : 600);
       return;
     }
+    let rating = null;
     if (window.Progress && state.history.length >= 10) {
       const p = profile();
-      window.Progress.rate(p.elo, result === "win" ? 1 : result === "draw" ? 0.5 : 0, "spar");
+      const before = window.Progress.get().rating.estimate;
+      const r = window.Progress.rate(p.elo, result === "win" ? 1 : result === "draw" ? 0.5 : 0, "spar");
+      rating = { before: before, after: r.estimate };
       window.Progress.touchDay(4);
     }
     hideTakeback();
@@ -379,6 +434,44 @@
       });
     });
     if (window.BoardView) window.BoardView.keep(box);
+    setTimeout(() => showResultSheet(result, reason, xpInfo, rating, top.length, mated), mated ? 1100 : 350);
+  }
+
+  /** 1.6.2: the win / draw / loss sheet. One headline, an XP count-up, a level bar, one primary action. */
+  function showResultSheet(result, reason, xpInfo, rating, nMoments, mated) {
+    if (!state.over) return;
+    document.querySelectorAll(".overlay.gr-ov").forEach((x) => x.remove());
+    const p = profile();
+    const resigned = /resign/i.test(reason || "");
+    const head = result === "win" ? (mated ? "Checkmate." : "You won.") : result === "draw" ? "Honors even." : resigned ? "Resigned." : "Not this time.";
+    const line = result === "win" ? (mated ? "Clean finish. The coach approves, quietly." : "A win is a win. Take it.")
+      : result === "draw" ? "Half a point, fully earned."
+        : "Every loss comes with the answers attached. Two moments are worth a look.";
+    const chips = [];
+    if (rating) { const d = rating.after - rating.before; chips.push(`<span class="gr-chip ${d >= 0 ? "up" : "down"}" data-testid="rating-chip">Rating ${rating.before} → ${rating.after} ${d >= 0 ? "▲" : "▼"}${Math.abs(d)}</span>`); }
+    if (state.game.bestCombo >= 2) chips.push(`<span class="gr-chip">Best combo ×${state.game.bestCombo}</span>`);
+    const ov = document.createElement("div");
+    ov.className = "overlay gr-ov";
+    ov.innerHTML = `<div class="ov-card gr-sheet ${result}" data-testid="game-result" data-result="${result}">
+      <div class="gr-kicker">${result === "win" ? "Win" : result === "draw" ? "Draw" : "Loss"} · vs ${String(p.shortName || p.name || "the bot").replace(/[<>&]/g, "")}</div>
+      <h2 class="gr-head">${head}</h2><p class="coach-msg">${line}</p>
+      ${xpInfo && xpInfo.total ? window.GameResult.tallyHtml(xpInfo) : ""}
+      ${chips.length ? `<div class="gr-chips">${chips.join("")}</div>` : ""}
+      <button type="button" class="primary" id="gr-next" data-testid="game-result-next">Play again</button>
+      <button type="button" class="ghost" id="gr-review">${nMoments ? "Review " + nMoments + " key moment" + (nMoments > 1 ? "s" : "") : "See the final position"}</button></div>`;
+    document.body.appendChild(ov);
+    if (xpInfo && xpInfo.total) window.GameResult.animate(ov, xpInfo);
+    if (window.Feel) {
+      if (result === "win") window.Feel.celebrate("win");
+      else if (result === "draw") { window.Feel.sound("good"); window.Feel.haptic("good"); }
+      else window.Feel.sound("ok");
+    }
+    ov.querySelector("#gr-next").addEventListener("click", () => { ov.remove(); newGame(); });
+    ov.querySelector("#gr-review").addEventListener("click", () => {
+      ov.remove();
+      const pg = $("#postgame");
+      if (pg && !pg.hidden && pg.scrollIntoView && nMoments) pg.scrollIntoView({ block: "nearest" });
+    });
   }
 
   function collectHighlights(list) {
@@ -512,14 +605,35 @@
     if (nudgeEl) nudgeEl.textContent = review.nudge || "";
     const reveal = $("#best-reveal");
     if (reveal) { reveal.hidden = true; reveal.textContent = ""; }
+    // 1.6.2 mistake moment: kicker, you-played vs better (hidden until asked), coral threat ring + arrow.
+    const big = (review.drop || 0) >= 300;
+    const kick = $("#mm-kicker");
+    if (kick) { kick.textContent = big ? "● Blunder · fixable" : "● Mistake · not a disaster"; kick.className = "mm-kicker" + (big ? "" : " mild"); }
+    const pl = $("#mm-played"); if (pl) pl.textContent = (tried && tried.san ? tried.san : "") + (big ? " ??" : " ?");
+    const bb = $("#mm-better"), box = $("#mm-better-box");
+    if (bb) bb.textContent = "Your call";
+    if (box) box.classList.add("hidden-best");
+    const quip = $("#mm-quip");
+    if (quip) {
+      const rival = state.bot && state.bot.kind === "rival";
+      quip.hidden = !rival;
+      quip.textContent = rival ? (state.bot.name || "Rival") + ": “" + QUIPS[state.history.length % QUIPS.length] + "”" : "";
+    }
     if (review.highlights) window.board.setHighlights(review.highlights);
-    if (review.arrows && window.board.setArrows) window.board.setArrows(review.arrows);
+    const arrows = (review.arrows || []).map((a) => Object.assign({}, a, { color: "#ff6b57" }));
+    if (window.board.setArrows) window.board.setArrows(arrows);
+    const marks = (window.board.marks || []).filter((m) => m.kind === "chip");
+    (review.highlights || []).filter((h) => h.kind === "hang").slice(0, 1).forEach((h) => marks.push({ square: h.square, kind: "ring" }));
+    if (window.board.setMarks) window.board.setMarks(marks);
     if (window.Sound) window.Sound.warn();
+    if (window.Feel) window.Feel.shake(window.board.root);
   }
 
   function confirmPending() {
     state.pending = null;
     hideTakeback();
+    if (window.board && window.board.setMarks) window.board.setMarks([]);
+    if (window.board && window.board.setArrows) window.board.setArrows([]);
     afterBlakeMoveSettled();
   }
 
@@ -530,6 +644,7 @@
     state.history.pop();
     state.pending = null;
     hideTakeback();
+    if (window.board.setMarks) window.board.setMarks([]);
     window.board.setPosition(state.chess.fen(), state.history.length ? { from: state.history[state.history.length - 1].from, to: state.history[state.history.length - 1].to } : null);
     window.board.setHighlights([]);
     if (window.board.setArrows) window.board.setArrows([]);
@@ -544,8 +659,15 @@
     const el = $("#best-reveal");
     if (!el) return;
     el.hidden = false;
-    el.textContent = (r.bestReason || ("Best was " + (r.bestSan || "a different move") + ".")) +
-      (r.evalWords ? " " + r.evalWords : "");
+    el.textContent = r.bestReason || (("Best was " + (r.bestSan || "a different move") + ".") + (r.evalWords ? " " + r.evalWords : ""));
+    const bb = $("#mm-better"), box = $("#mm-better-box");
+    if (bb && r.bestSan) bb.textContent = r.bestSan + " ✓";
+    if (box) box.classList.remove("hidden-best");
+    const bm = r.bestMove;
+    if (bm && bm.from && bm.to && window.board.setArrows) {
+      // The better move is from the position before the mistake: draw it on that position's squares.
+      window.board.setArrows((window.board.arrows || []).concat([{ from: bm.from, to: bm.to, color: "#3fe3b2", dash: true }]));
+    }
   }
 
   async function afterBlakeMoveSettled() {
@@ -629,6 +751,7 @@
   async function handleBlakeMove(spec) {
     if (state.over || state.thinking || state.pending) return;
     if (state.chess.turn() !== blakeColor()) return;
+    if (window.board && window.board.setMarks) window.board.setMarks([]);
     const fenBefore = state.chess.fen();
     const chessBefore = new Chess(fenBefore);
     const preview = new Chess(fenBefore);
@@ -636,6 +759,8 @@
     if (!mv) return;
     applyMove({ from: spec.from, to: spec.to, promotion: spec.promotion || "q" });
     if (state.mode === "off") {
+      const qm = qualityOf(null, state.chess);
+      if (qm) markMove(mv, qm, 0);
       afterBlakeMoveSettled();
       return;
     }
@@ -649,6 +774,22 @@
       review = { warn: false, text: "", flags: [], highlights: [] };
     }
     state.thinking = false;
+    const q = state.engineReady ? qualityOf(review, state.chess) : qualityOf(null, state.chess);
+    if (state.engineReady && !review.warn) {
+      const g = state.game;
+      g.clean++; g.combo++; g.bestCombo = Math.max(g.bestCombo, g.combo);
+      const xp = window.GameResult ? window.GameResult.XP.clean : 3;
+      if (g.clean <= (window.GameResult ? window.GameResult.XP.cleanCap : 20)) g.xpLive += xp;
+      markMove(mv, q, g.clean <= 20 ? xp : 0);
+      if (window.Feel) {
+        if (g.combo >= 2) window.Feel.combo(g.combo);
+        if (q && (q.tone === "best" || q.tone === "mate")) window.Feel.haptic("good");
+      }
+      renderCombo();
+    } else if (q) {
+      if (review.warn) { state.game.combo = 0; renderCombo(); }
+      markMove(mv, q, 0);
+    }
     if (review.praise && review.text) {
       pushCoach("ok", review.text);
       if (window.Sound) window.Sound.good();
@@ -696,6 +837,10 @@
     state.bookPlies = 0;
     state.thinking = false;
     state.lastCueId = null;
+    document.querySelectorAll(".overlay.gr-ov").forEach((x) => x.remove());
+    setResignVisible(true);
+    resetGameFeel();
+    state.plyBase = 0;
     if (!opts.keepBot) { state.bot = null; state.onEnd = null; }
     state.startFen = opts.fen || null;
     if (opts.fen) {
@@ -782,6 +927,9 @@
     if (window.Feel) {
       const m = $("#btn-mute"), r = $("#btn-motion"), c = $("#btn-character");
       if (m) m.addEventListener("click", () => window.Feel.toggleMute());
+      const hb = $("#btn-haptics"), pm = $("#btn-play-mute");
+      if (hb) hb.addEventListener("click", () => { const on = window.Feel.toggleHaptics(); if (on) window.Feel.haptic("tap"); });
+      if (pm) pm.addEventListener("click", () => { const mu = window.Feel.toggleMute(); if (!mu) window.Feel.sound("tap"); });
       if (r) r.addEventListener("click", () => window.Feel.toggleReducedMotion());
       if (c) c.addEventListener("click", () => { const sh = $("#settings-sheet"); if (sh) sh.hidden = true; window.Adventure && window.Adventure.openEditor(); });
       // Inline rename lives in Settings only while it is open (one character-name field on screen at a time).
@@ -1270,8 +1418,13 @@
       return mv.san;
     },
     resign() { if (!state.over) endGame("loss", "You resigned."); },
-    setPosition(fen, playAs) {
+    setPosition(fen, playAs, opts) {
       state.chess = new Chess(fen);
+      document.querySelectorAll(".overlay.gr-ov").forEach((x) => x.remove());
+      resetGameFeel();
+      setResignVisible(true);
+      state.plyBase = (opts && opts.plies) || 0;
+      if (opts && opts.clean) { state.game.clean = opts.clean; state.game.combo = opts.clean; state.game.bestCombo = opts.clean; renderCombo(); }
       state.history = [];
       state.uciHistory = [];
       state.pending = null;

@@ -468,7 +468,7 @@
     }
     return true;
   }
-  function rivalEnd(result) {
+  function rivalEnd(result, xpInfo) {
     snapGame();
     const ctx = rivalCtx || { rv: RIVALS.tower, elo: rating(), region: "tower" };
     const score = result === "win" ? 1 : result === "draw" ? 0.5 : 0;
@@ -493,8 +493,14 @@
     unlockRematch(ctx.region);
     const ov = overlay("rival-result", `${portrait(ctx.rv, 64)}<h2>${esc(head)}</h2><p class="coach-msg">“${esc(quip)}”</p>
       <p class="end-stat">Rating ${before} → ${r.estimate} (estimate)</p>
+      ${xpInfo && xpInfo.total && window.GameResult ? '<div class="rv-xp">' + window.GameResult.tallyHtml(xpInfo) + "</div>" : ""}
       <button type="button" class="primary" id="rr-next" data-testid="session-next-step">Next: ${esc(next.label)}, ${next.minutes} min</button>
       <button type="button" class="ghost" id="rr-map">Back to the map</button>`);
+    if (xpInfo && xpInfo.total && window.GameResult) window.GameResult.animate(ov, xpInfo);
+    if (window.Feel) {
+      if (result === "win") window.Feel.celebrate("win");
+      else if (result === "draw") { window.Feel.sound("good"); window.Feel.haptic("good"); }
+    }
     $("#rr-next", ov).addEventListener("click", () => { ov.remove(); next.go(); });
     $("#rr-map", ov).addEventListener("click", () => { ov.remove(); openMap(); });
     rivalCtx = null;
@@ -693,7 +699,7 @@
     REGIONS, RIVALS, regionFor, start, nodes, trailNodes, rematchReady, logEvent, path: buildPath, nodeForLesson, completeNode, completeFromLesson, startNode, nextStep,
     getCharacter, setCharacter, avatarSVG, openCreate: () => openCreate(false), openEditor: () => openCreate(true), ensureCharacter,
     render, open: openMap, openMap, openLog, shareImage, show,
-    showRivalIntro, startRival, endRival: (r) => rivalEnd(r || "draw"), rivalEnd,
+    showRivalIntro, startRival, endRival: (r, x) => rivalEnd(r || "draw", x), rivalEnd,
     startPlacement, finishPlacement, placementGameEnd, brandNew, playLater,
     setRating: (n) => window.Progress.setRating(n),
     get lessonToNode() { const o = {}; buildPath().forEach((n) => { if (n.lesson) o[n.lesson] = n.id; }); return o; },

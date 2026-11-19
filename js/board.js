@@ -1,6 +1,7 @@
 /* SVG piece set (Cburnett, CC BY-SA 3.0), themes, animation, material, in-square coords. */
 (function () {
   const THEMES = [
+    { id: "nightfall", name: "Nightfall" },
     { id: "slate", name: "Slate & Sand" },
     { id: "dusk", name: "Dusk" },
     { id: "ink", name: "Ink" },
@@ -14,8 +15,8 @@
     try {
       const id = localStorage.getItem(THEME_KEY);
       if (THEMES.some((t) => t.id === id)) return id;
-      return "slate";
-    } catch (e) { return "slate"; }
+      return "nightfall";
+    } catch (e) { return "nightfall"; }
   }
   function saveTheme(id) {
     try { localStorage.setItem(THEME_KEY, id); } catch (e) {}
@@ -83,6 +84,7 @@
       this.lastMove = null;
       this.fen = new Chess().fen();
       this.arrows = [];
+      this.marks = []; // 1.6.2: move-quality chips, threat rings and floating +XP (persist across renders)
       this._drag = null;
       this._ghost = null;
       this._promoOpen = false;
@@ -118,8 +120,31 @@
     setHighlights(list) { this.highlights = list || []; this.render(); }
     clearSelection() { this.selected = null; this.legal = []; this.render(); }
     setArrows(list) { this.arrows = list || []; this._drawArrows(); }
+    /** 1.6.2: marks = [{ square, kind: "chip"|"ring"|"xp", label, tone }]. Shape + text, never color alone. */
+    setMarks(list) { this.marks = list || []; this._drawMarks(); }
+    addMark(m) { if (m && m.square) { this.marks = (this.marks || []).concat([m]); this._drawMarks(); } }
+    squareEl(sq) { return this.root.querySelector('[data-sq="' + sq + '"]'); }
+    _drawMarks() {
+      const sizer = this.root.querySelector(".cb-sizer");
+      if (!sizer) return;
+      let layer = sizer.querySelector(".cb-marks");
+      if (!layer) { layer = document.createElement("div"); layer.className = "cb-marks"; layer.setAttribute("aria-hidden", "true"); sizer.appendChild(layer); }
+      layer.innerHTML = "";
+      (this.marks || []).forEach((m) => {
+        if (!m || !m.square || !/^[a-h][1-8]$/.test(m.square)) return;
+        const c = this._sqCenter(m.square);
+        const el = document.createElement("span");
+        el.className = "cb-mark cb-mark-" + (m.kind || "chip") + (m.tone ? " tone-" + m.tone : "");
+        el.style.left = (c.x / 8 * 100) + "%";
+        el.style.top = (c.y / 8 * 100) + "%";
+        if (m.kind === "chip") { el.setAttribute("data-testid", "move-label"); el.setAttribute("data-label", m.tone || ""); }
+        if (m.kind === "xp") el.setAttribute("data-testid", "xp-float");
+        el.textContent = m.label || "";
+        layer.appendChild(el);
+      });
+    }
     setTheme(id) {
-      const ok = THEMES.some((t) => t.id === id) ? id : "slate";
+      const ok = THEMES.some((t) => t.id === id) ? id : "nightfall";
       saveTheme(ok);
       if (this.root) this.root.setAttribute("data-theme", ok);
     }
@@ -127,6 +152,7 @@
     _animateLast(mv) {
       try {
         if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (document.documentElement.classList.contains("reduced-motion")) return;
       } catch (e) {}
       const piece = this.root.querySelector('[data-sq="' + mv.to + '"] .cb-piece');
       const fromBtn = this.root.querySelector('[data-sq="' + mv.from + '"]');
@@ -209,6 +235,7 @@
         line.setAttribute("stroke-linecap", "round");
         line.setAttribute("marker-end", "url(#" + midI + ")");
         line.setAttribute("opacity", a.opacity || 0.92);
+        if (a.dash) line.setAttribute("stroke-dasharray", "0.32 0.22");
         line.setAttribute("class", "cb-arrow-line");
         svg.appendChild(line);
         if (this.onArrow) {
@@ -327,6 +354,7 @@
       this.root.innerHTML = html;
       this._syncPieceSize();
       this._drawArrows();
+      if (this.marks && this.marks.length) this._drawMarks();
     }
 
     _squareAtPoint(x, y) {
